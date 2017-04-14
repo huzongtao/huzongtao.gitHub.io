@@ -1,8 +1,8 @@
 ---
 layout: page
 title: About Me
-description: 没人比我会更恨我自己
-keywords: 毛运
+description: Make the impossible possible, the possible easy and the easy elegant
+keywords: 胡宗涛
 comments: true
 menu: 关于我
 permalink: /about/
@@ -11,14 +11,14 @@ permalink: /about/
 
 # 联系方式
 
-- Email：maoyun0903@163.com
-- 微信号：maoyun19900818
+- Email：zongtao_hu@163.com
+- 微信号：tao11122
 
 ---
 
 # 个人信息
-- Github: http://github.com/muarine
-- 爱好：摇滚，骑行
+- Github: https://github.com/huzongtao
+- 爱好：旅行，听歌
 
 
 ## Skill Keywords
