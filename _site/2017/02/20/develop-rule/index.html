@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="google-site-verification" content="KrB23GIOU5WYje5ZqEg8Hr4GAb5rr3FHbCBVfbzfvOQ" />
-    <title>Java编程规约 &mdash; 毛茸茸</title>
+    <title>Java编程规约 &mdash; 可口不可乐</title>
     <link rel="stylesheet" href="/assets/vendor/primer-css/css/primer.css">
     <link rel="stylesheet" href="/assets/vendor/primer-markdown/dist/user-content.min.css">
     <link rel="stylesheet" href="/assets/vendor/octicons/octicons/octicons.css">
@@ -19,32 +19,32 @@
     <link rel="stylesheet" href="/assets/css/globals/responsive.css">
     <link rel="stylesheet" href="/assets/css/posts/index.css">
     <!-- Latest compiled and minified CSS -->
-    
 
-    
+
+
     <link rel="canonical" href="http://localhost:4000/2017/02/20/develop-rule/">
-    <link rel="alternate" type="application/atom+xml" title="毛茸茸" href="/feed.xml">
+    <link rel="alternate" type="application/atom+xml" title="可口不可乐" href="/feed.xml">
     <link rel="shortcut icon" href="/favicon.ico">
-    
+
     <meta property="og:title" content="Java编程规约">
-      
-    <meta name="keywords" content="毛运,博客">
-    <meta name="og:keywords" content="毛运,博客">
-      
+
+    <meta name="keywords" content="胡宗涛,博客">
+    <meta name="og:keywords" content="胡宗涛,博客">
+
     <meta name="description" content="编程规约">
     <meta name="og:description" content="编程规约">
-      
-    
-    
-        
-    
+
+
+
+
+
     <meta property="og:url" content="http://localhost:4000/2017/02/20/develop-rule/">
-    <meta property="og:site_name" content="毛茸茸">
+    <meta property="og:site_name" content="可口不可乐">
     <meta property="og:type" content="article">
     <meta property="og:locale" content="zh_CN" />
-    
+
     <meta property="article:published_time" content="2017-02-20">
-    
+
     <script src="/assets/vendor/jquery/dist/jquery.min.js"></script>
     <script src="/assets/js/jquery-ui.js"></script>
     <script type="text/javascript">
@@ -61,22 +61,22 @@
 <body class="" data-mz="">
     <header class="site-header">
         <div class="container">
-            <h1><a href="/" title="毛茸茸"><span class="octicon octicon-mark-github"></span> 毛茸茸</a></h1>
+            <h1><a href="/" title="可口不可乐"><span class="octicon octicon-mark-github"></span> 可口不可乐</a></h1>
             <button class="collapsed mobile-visible" type="button" onclick="toggleMenu();">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
             <nav class="site-header-nav" role="navigation">
-                
+
                 <a href="/" class=" site-header-nav-item" target="" title="首页">首页</a>
-                
+
                 <a href="/categories/" class=" site-header-nav-item" target="" title="分类">分类</a>
-                
+
                 <a href="/MySkillTree/" class=" site-header-nav-item" target="" title="我的技能树">我的技能树</a>
-                
+
                 <a href="/about/" class=" site-header-nav-item" target="" title="关于我">关于我</a>
-                
+
             </nav>
         </div>
     </header>
@@ -89,17 +89,17 @@
       <div class="collection-title">
         <h1 class="collection-header">Java编程规约</h1>
         <div class="collection-info">
-          
+
           <span class="meta-info">
             <span class="octicon octicon-calendar"></span> 2017/02/20
           </span>
-          
-          
+
+
           <span class="meta-info">
             <span class="octicon octicon-file-directory"></span>
             <a href="/categories/#Java" title="Java">Java</a>
           </span>
-          
+
         </div>
       </div>
     </div>
@@ -366,8 +366,8 @@ B) 领域模型命名规约
 	说明:keySet 其实是遍历了 2 次,一次是转为 Iterator 对象,另一次是从 hashMap 中取出 key 所对应的 value。而 entrySet 只是遍历了一次就把 key 和 value 都放到了 entry 中,效率更 高。如果是 JDK8,使用 Map.foreach 方法。
 	正例:values()返回的是 V 值集合,是一个 list 集合对象;keySet()返回的是 K 值集合,是 一个 Set 集合对象;entrySet()返回的是 K-V 值组合集合。
 11.【推荐】高度注意 Map 类集合 K/V 能不能存储 null 值的情况,如下表格:
-  集合类              	Key      	Value    	Super      	说明    
-  HashTable        	不允许为 null	不允许为 null	Dictionary 	线程安全  
+  集合类              	Key      	Value    	Super      	说明
+  HashTable        	不允许为 null	不允许为 null	Dictionary 	线程安全
   ConcurrentHashMap	不允许为 null	不允许为 null	AbstractMap	线程局部安全
   TreeMap          	不允许为 null	允许为 null 	AbstractMap	线程不安全
   HashMap          	允许为 null 	允许为 null 	AbstractMap	线程不安全
@@ -394,7 +394,7 @@ B) 领域模型命名规约
 	说明:如果每次访问冲突概率小于 20%,推荐使用乐观锁,否则使用悲观锁。乐观锁的重试次数不得小于 3 次。
 25.【强制】多线程并行处理定时任务时,Timer 运行多个 TimeTask 时,只要其中之一没有捕获 抛出的异常,其它任务便会自动终止运行,使用 ScheduledExecutorService 则没有这个问题。
 26.【强制】线程池不允许使用 Executors 去创建,而是通过 ThreadPoolExecutor 的方式,这样 的处理方式让写的同学更加明确线程池的运行规则,规避资源耗尽的风险。 说明:Executors 各个方法的弊端:
-	1) newFixedThreadPool 和 newSingleThreadExecutor:主要问题是堆积的请求处理队列可能会耗费非常大的内存,甚至 OOM。 	
+	1) newFixedThreadPool 和 newSingleThreadExecutor:主要问题是堆积的请求处理队列可能会耗费非常大的内存,甚至 OOM。
 	2) newCachedThreadPool 和 newScheduledThreadPool:主要问题是线程数最大数是 Integer.MAX_VALUE,可能会创建数量非常多的线程,甚至 OOM。
 27.【强制】创建线程或线程池时请指定有意义的线程名称,方便出错时回溯。
 	正例:
@@ -747,13 +747,13 @@ B) 领域模型命名规约
       <div class="share-component"></div>
     </div>
     <div class="comment">
-      
-  
-      
-        
+
+
+
+
         <!-- Disqus Protection, see https://github.com/mzlogin/mzlogin.github.io/issues/2 -->
-        
-        
+
+
           <div id="disqus_thread"></div>
           <script>
             var disqus_config = function () {
@@ -775,15 +775,15 @@ B) 领域模型命名规约
             })();
           </script>
           <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
-        
-      
-    
+
+
+
 
 
     </div>
   </div>
   <div class="column one-fourth">
-    
+
 <h3>Search</h3>
 <div id="site_search">
     <input type="text" id="search_box" placeholder="Search">
@@ -797,7 +797,7 @@ B) 领域模型命名规约
 <script src="/assets/js/search.js"></script>
 
 
-    
+
 <h3>Post Directory</h3>
 <div id="post-directory-module" class="mobile-hidden">
   <section class="post-directory">
@@ -818,7 +818,7 @@ B) 领域模型命名规约
         <div class="site-footer" role="contentinfo">
             <div class="copyright left mobile-block">
                     © <script>document.write(new Date().getFullYear())</script>
-                    <span title="毛运">毛运</span>
+                    <span title="胡宗涛">胡宗涛</span>
                     <a href="javascript:window.scrollTo(0,0)" class="right mobile-visible">TOP</a>
             </div>
 
@@ -831,23 +831,23 @@ B) 领域模型命名规约
                 <span class="mega-octicon octicon-mark-github" title="GitHub"></span>
             </a>
             <ul class="site-footer-links mobile-hidden">
-                
+
                 <li>
                     <a href="/" title="首页" target="">首页</a>
                 </li>
-                
+
                 <li>
                     <a href="/categories/" title="分类" target="">分类</a>
                 </li>
-                
+
                 <li>
                     <a href="/MySkillTree/" title="我的技能树" target="">我的技能树</a>
                 </li>
-                
+
                 <li>
                     <a href="/about/" title="关于我" target="">关于我</a>
                 </li>
-                
+
                 <li><a href="/feed.xml"><span class="octicon octicon-rss" style="color:orange;"></span></a></li>
             </ul>
 
@@ -867,6 +867,6 @@ B) 领域模型命名规约
        // hljs.initHighlightingOnLoad();
       });
     </script>
-    
+
 </body>
 </html>
