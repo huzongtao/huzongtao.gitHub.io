@@ -2,7 +2,7 @@
 #   Main Configs   #
 # ---------------- #
 baseurl:
-url: https://hunter.github.io/
+url: https://huzongtao.github.io/
 date_format: "ordinal"
 title: 可口不可乐
 subtitle: "Make the impossible possible, the possible easy and the easy elegant"
@@ -11,7 +11,7 @@ keywords: "胡宗涛,博客"
 favicon: /favicon.ico
 timezone: Asia/BeiJing
 encoding: "utf-8"
-source_code: https://github.com/zongtao/hunter.github.io
+source_code: https://github.com/huzongtao/huzongtao.github.io
 side_bar_repo_limit: 3
 
 # ---------------- #
