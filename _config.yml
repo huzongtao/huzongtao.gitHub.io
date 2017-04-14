@@ -5,8 +5,8 @@ baseurl:
 url: https://hunter.github.io/
 date_format: "ordinal"
 title: 可口不可乐
-subtitle: "Hunter's Blog"
-description: "点滴记录"
+subtitle: "Make the impossible possible, the possible easy and the easy elegant"
+description: "Hunter's blogs"
 keywords: "胡宗涛,博客"
 favicon: /favicon.ico
 timezone: Asia/BeiJing
