@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans" prefix="og: http://ogp.me/ns#" class="han-init">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="google-site-verification" content="KrB23GIOU5WYje5ZqEg8Hr4GAb5rr3FHbCBVfbzfvOQ" />
+    <title>SpringMVC DispatcherServlet调度过程 &mdash; 毛茸茸</title>
+    <link rel="stylesheet" href="/assets/vendor/primer-css/css/primer.css">
+    <link rel="stylesheet" href="/assets/vendor/primer-markdown/dist/user-content.min.css">
+    <link rel="stylesheet" href="/assets/vendor/octicons/octicons/octicons.css">
+    <link rel="stylesheet" href="/assets/css/components/collection.css">
+    <link rel="stylesheet" href="/assets/css/components/repo-card.css">
+    <link rel="stylesheet" href="/assets/css/sections/repo-list.css">
+    <link rel="stylesheet" href="/assets/css/sections/mini-repo-list.css">
+    <link rel="stylesheet" href="/assets/css/components/boxed-group.css">
+    <link rel="stylesheet" href="/assets/css/globals/common.css">
+    <link rel="stylesheet" href="/assets/vendor/share.js/dist/css/share.min.css">
+    <link rel="stylesheet" href="/assets/css/globals/responsive.css">
+    <link rel="stylesheet" href="/assets/css/posts/index.css">
+    <!-- Latest compiled and minified CSS -->
+    
+
+    
+    <link rel="canonical" href="http://localhost:4000/2017/03/21/DispatcherServlet%E8%B0%83%E5%BA%A6%E8%BF%87%E7%A8%8B/">
+    <link rel="alternate" type="application/atom+xml" title="毛茸茸" href="/feed.xml">
+    <link rel="shortcut icon" href="/favicon.ico">
+    
+    <meta property="og:title" content="SpringMVC DispatcherServlet调度过程">
+      
+    <meta name="keywords" content="毛运,博客">
+    <meta name="og:keywords" content="毛运,博客">
+      
+    <meta name="description" content="请求响应DispatcherServlet处理流程总结应该如何看源码：```wiki  根据Servlet生命周期(init/service/destroy) 从顶层往下逐个深入，Servlet-HttpServletBean-FrameworkServlet-DispatcherServlet">
+    <meta name="og:description" content="请求响应DispatcherServlet处理流程总结应该如何看源码：```wiki  根据Servlet生命周期(init/service/destroy) 从顶层往下逐个深入，Servlet-HttpServletBean-FrameworkServlet-DispatcherServlet">
+      
+    
+    
+        
+    
+    <meta property="og:url" content="http://localhost:4000/2017/03/21/DispatcherServlet%E8%B0%83%E5%BA%A6%E8%BF%87%E7%A8%8B/">
+    <meta property="og:site_name" content="毛茸茸">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="zh_CN" />
+    
+    <meta property="article:published_time" content="2017-03-21">
+    
+    <script src="/assets/vendor/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/js/jquery-ui.js"></script>
+    <script type="text/javascript">
+    function toggleMenu() {
+        var nav = document.getElementsByClassName("site-header-nav")[0];
+        if (nav.style.display == "inline-flex") {
+          nav.style.display = "none";
+        } else {
+          nav.style.display = "inline-flex";
+        }
+    }
+    </script>
+</head>
+<body class="" data-mz="">
+    <header class="site-header">
+        <div class="container">
+            <h1><a href="/" title="毛茸茸"><span class="octicon octicon-mark-github"></span> 毛茸茸</a></h1>
+            <button class="collapsed mobile-visible" type="button" onclick="toggleMenu();">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <nav class="site-header-nav" role="navigation">
+                
+                <a href="/" class=" site-header-nav-item" target="" title="首页">首页</a>
+                
+                <a href="/categories/" class=" site-header-nav-item" target="" title="分类">分类</a>
+                
+                <a href="/MySkillTree/" class=" site-header-nav-item" target="" title="我的技能树">我的技能树</a>
+                
+                <a href="/about/" class=" site-header-nav-item" target="" title="关于我">关于我</a>
+                
+            </nav>
+        </div>
+    </header>
+    <!-- / header -->
+
+    <section class="collection-head small geopattern" data-pattern-id="SpringMVC Dispa">
+<div class="container">
+  <div class="columns">
+    <div class="column three-fourths">
+      <div class="collection-title">
+        <h1 class="collection-header">SpringMVC DispatcherServlet调度过程</h1>
+        <div class="collection-info">
+          
+          <span class="meta-info">
+            <span class="octicon octicon-calendar"></span> 2017/03/21
+          </span>
+          
+          
+          <span class="meta-info">
+            <span class="octicon octicon-file-directory"></span>
+            <a href="/categories/#SpringMVC" title="SpringMVC">SpringMVC</a>
+          </span>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+<!-- / .banner -->
+<section class="container content">
+<div class="columns">
+  <div class="column three-fourths" >
+    <article class="article-content markdown-body">
+    <h2 id="请求响应dispatcherservlet处理流程">请求响应DispatcherServlet处理流程</h2>
+<h3 id="总结应该如何看源码">总结应该如何看源码：</h3>
+<pre><code class="language-wiki">1. 根据Servlet生命周期(init/service/destroy) 从顶层往下逐个深入，Servlet-HttpServletBean-FrameworkServlet-DispatcherServlet
+
+2. 根据具体RequestMapper接口服务地址，开启debug模式，把断点放置doService方法内，跟踪代码一步步深入理解从请求到响应，DispatcherServlet的调度原理
+</code></pre>
+
+<h3 id="大概的调用流程">大概的调用流程</h3>
+<ol>
+  <li>获得HandlerMapping</li>
+  <li>获得HandlerExecutionChain</li>
+  <li>获得HandleAdapter适配器</li>
+  <li>检测并注册Handler的拦截器</li>
+  <li>请求参数绑定</li>
+  <li>初始化视图容器</li>
+  <li>handle反射调用Controller method</li>
+  <li>装载ModelAndView</li>
+  <li>适配ModelAndView
+```java
+// 开始调度
+protected DispatcherServlet.doDispatch(HttpServletRequest request, HttpServletResponse response)</li>
+</ol>
+
+<p>// 遍历已初始化的 请求处理器集合(List<HandlerMapping> handlerMappings） 得到一个Handler执行器
+// RequestMappingHandleMapping  SimpleUrlHandleMapping  BeanNameUrlHandleMapping
+// 加载context.getBean()获取 HandlerExecutionChain
+protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception</HandlerMapping></p>
+
+<p>// 到这就已经确定该调用哪个Controller.method以及return类型
+// HandlerExecutionChain mappedHandler执行链，获取HandleAdapter适配器
+HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());</p>
+
+<p>// Apply preHandle methods of registered interceptors. 检测并注册Handler的拦截器
+boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response)</p>
+
+<p>// 开始调用Controller.method
+ModelAndView mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+// 下面是真正开始调用handler的过程
+  /**
+	 * Invoke the {@link RequestMapping} handler method preparing a {@link ModelAndView}
+	 * if view resolution is required.
+	 * @since 4.2
+	 * @see #createInvocableHandlerMethod(HandlerMethod)
+	 */
+	protected ModelAndView invokeHandlerMethod(HttpServletRequest request,
+			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>	ServletWebRequest webRequest = new ServletWebRequest(request, response);
+	try {
+  // 请求参数绑定
+		WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
+		ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
+  // 初始化 反射调用handler
+		ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
+		invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+		invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+		invocableMethod.setDataBinderFactory(binderFactory);
+		invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+  // 初始化 视图容器
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+		mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
+		modelFactory.initModel(webRequest, mavContainer, invocableMethod);
+		mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
+
+		AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
+		asyncWebRequest.setTimeout(this.asyncRequestTimeout);
+
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		asyncManager.setTaskExecutor(this.taskExecutor);
+		asyncManager.setAsyncWebRequest(asyncWebRequest);
+		asyncManager.registerCallableInterceptors(this.callableInterceptors);
+		asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
+
+		if (asyncManager.hasConcurrentResult()) {
+			Object result = asyncManager.getConcurrentResult();
+			mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
+			asyncManager.clearConcurrentResult();
+			if (logger.isDebugEnabled()) {
+				logger.debug("Found concurrent result value [" + result + "]");
+			}
+			invocableMethod = invocableMethod.wrapConcurrentResult(result);
+		}
+  // 反射invoke执行Controller里的method，并把结果装载进mavContainer
+		invocableMethod.invokeAndHandle(webRequest, mavContainer);
+		if (asyncManager.isConcurrentHandlingStarted()) {
+			return null;
+		}
+  // 匹配合适的ModelAndView
+		return getModelAndView(mavContainer, modelFactory, webRequest);
+	}
+	finally {
+		webRequest.requestCompleted();
+	}
+} // 匹配ModelAndView视图 private ModelAndView getModelAndView(ModelAndViewContainer mavContainer,
+		ModelFactory modelFactory, NativeWebRequest webRequest) throws Exception {
+
+	modelFactory.updateModel(webRequest, mavContainer);
+// 对于Restful API 直接return null
+	if (mavContainer.isRequestHandled()) {
+		return null;
+	}
+	ModelMap model = mavContainer.getModel();
+	ModelAndView mav = new ModelAndView(mavContainer.getViewName(), model, mavContainer.getStatus());
+	if (!mavContainer.isViewReference()) {
+		mav.setView((View) mavContainer.getView());
+	}
+	if (model instanceof RedirectAttributes) {
+		Map&lt;String, ?&gt; flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
+		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
+		RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);
+	}
+	return mav;
+}
+</code></pre>
+</div>
+
+<p>//
+//
+```</p>
+
+    </article>
+    <div class="share">
+      <div class="share-component"></div>
+    </div>
+    <div class="comment">
+      
+  
+      
+        
+        <!-- Disqus Protection, see https://github.com/mzlogin/mzlogin.github.io/issues/2 -->
+        
+        
+          <div id="disqus_thread"></div>
+          <script>
+            var disqus_config = function () {
+              this.page.url = 'http://localhost:4000/2017/03/21/DispatcherServlet%E8%B0%83%E5%BA%A6%E8%BF%87%E7%A8%8B/';
+              this.page.identifier = '/2017/03/21/DispatcherServlet%E8%B0%83%E5%BA%A6%E8%BF%87%E7%A8%8B/';
+              this.page.title = 'SpringMVC DispatcherServlet调度过程';
+            };
+            (function() { // DON'T EDIT BELOW THIS LINE
+              var d = document, s = d.createElement('script');
+
+              s.type = 'text/javascript';
+              s.async = true;
+              var shortname = 'muarine-github-io';
+
+              s.src = '//' + shortname + '.disqus.com/embed.js';
+
+              s.setAttribute('data-timestamp', +new Date());
+              (d.head || d.body).appendChild(s);
+            })();
+          </script>
+          <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+        
+      
+    
+
+
+    </div>
+  </div>
+  <div class="column one-fourth">
+    
+<h3>Search</h3>
+<div id="site_search">
+    <input type="text" id="search_box" placeholder="Search">
+    <button class="btn btn-default" id="site_search_do"><span class="octicon octicon-search"></span></button>
+</div>
+
+<ul id="search_results"></ul>
+
+<link rel="stylesheet" type="text/css" href="/assets/css/modules/sidebar-search.css">
+<script src="/assets/js/lunr.min.js"></script>
+<script src="/assets/js/search.js"></script>
+
+
+    
+<h3>Post Directory</h3>
+<div id="post-directory-module" class="mobile-hidden">
+  <section class="post-directory">
+  <!-- Links that trigger the jumping -->
+  <!-- Added by javascript below -->
+  <dl></dl>
+  </section>
+</div>
+
+<script src="/assets/js/jquery.toc.js"></script>
+
+  </div>
+</div>
+</section>
+<!-- /section.content -->
+
+    <footer class="container">
+        <div class="site-footer" role="contentinfo">
+            <div class="copyright left mobile-block">
+                    © <script>document.write(new Date().getFullYear())</script>
+                    <span title="毛运">毛运</span>
+                    <a href="javascript:window.scrollTo(0,0)" class="right mobile-visible">TOP</a>
+            </div>
+
+            <ul class="site-footer-links right mobile-hidden">
+                <li>
+                    <a href="javascript:window.scrollTo(0,0)" >TOP</a>
+                </li>
+            </ul>
+            <a href="https://github.com/muarine/muarine.github.io" target="_blank" aria-label="view source code">
+                <span class="mega-octicon octicon-mark-github" title="GitHub"></span>
+            </a>
+            <ul class="site-footer-links mobile-hidden">
+                
+                <li>
+                    <a href="/" title="首页" target="">首页</a>
+                </li>
+                
+                <li>
+                    <a href="/categories/" title="分类" target="">分类</a>
+                </li>
+                
+                <li>
+                    <a href="/MySkillTree/" title="我的技能树" target="">我的技能树</a>
+                </li>
+                
+                <li>
+                    <a href="/about/" title="关于我" target="">关于我</a>
+                </li>
+                
+                <li><a href="/feed.xml"><span class="octicon octicon-rss" style="color:orange;"></span></a></li>
+            </ul>
+
+        </div>
+    </footer>
+    <!-- / footer -->
+    <script src="/assets/vendor/share.js/dist/js/share.min.js"></script>
+    <script src="/assets/js/geopattern.js"></script>
+    <script src="/assets/js/prism.js"></script>
+    <link rel="stylesheet" href="/assets/css/globals/prism.css">
+    <script>
+      jQuery(document).ready(function($) {
+        // geopattern
+        $('.geopattern').each(function(){
+          $(this).geopattern($(this).data('pattern-id'));
+        });
+       // hljs.initHighlightingOnLoad();
+      });
+    </script>
+    
+</body>
+</html>
