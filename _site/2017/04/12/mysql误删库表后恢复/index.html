@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans" prefix="og: http://ogp.me/ns#" class="han-init">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="google-site-verification" content="KrB23GIOU5WYje5ZqEg8Hr4GAb5rr3FHbCBVfbzfvOQ" />
+    <title>Mysql误删库表后数据恢复 &mdash; 可口不可乐</title>
+    <link rel="stylesheet" href="/assets/vendor/primer-css/css/primer.css">
+    <link rel="stylesheet" href="/assets/vendor/primer-markdown/dist/user-content.min.css">
+    <link rel="stylesheet" href="/assets/vendor/octicons/octicons/octicons.css">
+    <link rel="stylesheet" href="/assets/css/components/collection.css">
+    <link rel="stylesheet" href="/assets/css/components/repo-card.css">
+    <link rel="stylesheet" href="/assets/css/sections/repo-list.css">
+    <link rel="stylesheet" href="/assets/css/sections/mini-repo-list.css">
+    <link rel="stylesheet" href="/assets/css/components/boxed-group.css">
+    <link rel="stylesheet" href="/assets/css/globals/common.css">
+    <link rel="stylesheet" href="/assets/vendor/share.js/dist/css/share.min.css">
+    <link rel="stylesheet" href="/assets/css/globals/responsive.css">
+    <link rel="stylesheet" href="/assets/css/posts/index.css">
+    <!-- Latest compiled and minified CSS -->
+    
+
+    
+    <link rel="canonical" href="http://localhost:4000/2017/04/12/mysql%E8%AF%AF%E5%88%A0%E5%BA%93%E8%A1%A8%E5%90%8E%E6%81%A2%E5%A4%8D/">
+    <link rel="alternate" type="application/atom+xml" title="可口不可乐" href="/feed.xml">
+    <link rel="shortcut icon" href="/favicon.ico">
+    
+    <meta property="og:title" content="Mysql误删库表后数据恢复">
+      
+    <meta name="keywords" content="胡宗涛,博客">
+    <meta name="og:keywords" content="胡宗涛,博客">
+      
+    <meta name="description" content="Mysql误删库表后数据恢复">
+    <meta name="og:description" content="Mysql误删库表后数据恢复">
+      
+    
+    
+        
+    
+    <meta property="og:url" content="http://localhost:4000/2017/04/12/mysql%E8%AF%AF%E5%88%A0%E5%BA%93%E8%A1%A8%E5%90%8E%E6%81%A2%E5%A4%8D/">
+    <meta property="og:site_name" content="可口不可乐">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="zh_CN" />
+    
+    <meta property="article:published_time" content="2017-04-12">
+    
+    <script src="/assets/vendor/jquery/dist/jquery.min.js"></script>
+    <script src="/assets/js/jquery-ui.js"></script>
+    <script type="text/javascript">
+    function toggleMenu() {
+        var nav = document.getElementsByClassName("site-header-nav")[0];
+        if (nav.style.display == "inline-flex") {
+          nav.style.display = "none";
+        } else {
+          nav.style.display = "inline-flex";
+        }
+    }
+    </script>
+</head>
+<body class="" data-mz="">
+    <header class="site-header">
+        <div class="container">
+            <h1><a href="/" title="可口不可乐"><span class="octicon octicon-mark-github"></span> 可口不可乐</a></h1>
+            <button class="collapsed mobile-visible" type="button" onclick="toggleMenu();">
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <nav class="site-header-nav" role="navigation">
+                
+                <a href="/" class=" site-header-nav-item" target="" title="首页">首页</a>
+                
+                <a href="/categories/" class=" site-header-nav-item" target="" title="分类">分类</a>
+                
+                <a href="/MySkillTree/" class=" site-header-nav-item" target="" title="我的技能树">我的技能树</a>
+                
+                <a href="/about/" class=" site-header-nav-item" target="" title="关于我">关于我</a>
+                
+            </nav>
+        </div>
+    </header>
+    <!-- / header -->
+
+    <section class="collection-head small geopattern" data-pattern-id="Mysql误删库表后数据恢复">
+<div class="container">
+  <div class="columns">
+    <div class="column three-fourths">
+      <div class="collection-title">
+        <h1 class="collection-header">Mysql误删库表后数据恢复</h1>
+        <div class="collection-info">
+          
+          <span class="meta-info">
+            <span class="octicon octicon-calendar"></span> 2017/04/12
+          </span>
+          
+          
+          <span class="meta-info">
+            <span class="octicon octicon-file-directory"></span>
+            <a href="/categories/#Mysql" title="Mysql">Mysql</a>
+          </span>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+<!-- / .banner -->
+<section class="container content">
+<div class="columns">
+  <div class="column three-fourths" >
+    <article class="article-content markdown-body">
+    <p>Mysql误删库表后数据恢复</p>
+
+<h3 id="事故发生原因">事故发生原因</h3>
+<p>今天用workbench想对测试库的表进行逆向工程导出数据模型，结果错点了“正向导入”一路next导致直接把测试库的所有表给干掉了，很难受！
+Linux系统版本：Centos6.6
+Mysql版本：5.6.25 Community</p>
+
+<h3 id="分析">分析</h3>
+<p>迅速把解决方法定位到“Mysql误删表后如何恢复”，如果日常有定时备份脚本当然再好不过，直接可以用上个时间点的sql恢复，但是我们的测试库没有备份，所以尝试用恢复log-bin操作日志的方式</p>
+<ol>
+  <li>查看测试服务器上的my.cnf配置
+    <div class="language-config highlighter-rouge"><pre class="highlight"><code><span class="n">datadir</span>=/<span class="n">var</span>/<span class="n">lib</span>/<span class="n">mysql</span>
+<span class="n">log</span>-<span class="n">bin</span>=<span class="n">mysql</span>-<span class="n">bin</span>
+</code></pre>
+    </div>
+    <p>查看mysql存储目录</p>
+    <div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="o">[</span>root@centos1 mysql]# <span class="nb">pwd</span>
+/var/lib/mysql
+<span class="o">[</span>root@centos1 mysql]# ls
+auto.cnf     mysql-bin.000001  mysql-bin.000012  mysql-bin.000023  mysql-bin.000034  mysql-bin.000045    point_bank               rtmap_guangf           xsmm
+beaconzone   mysql-bin.000002  mysql-bin.000013  mysql-bin.000024  mysql-bin.000035  mysql-bin.000046    promo                    rtmap_pay_v3           zhuawawa
+doubleball   mysql-bin.000003  mysql-bin.000014  mysql-bin.000025  mysql-bin.000036  mysql-bin.000047    promo3                   rts_1@002e0@002e0      zhuawawa1
+dragon_boat  mysql-bin.000004  mysql-bin.000015  mysql-bin.000026  mysql-bin.000037  mysql-bin.000048    promo3@002dfull          run_game
+ibdata1      mysql-bin.000005  mysql-bin.000016  mysql-bin.000027  mysql-bin.000038  mysql-bin.000049    promo3_back20            settlement@002dsystem
+ib_logfile0  mysql-bin.000006  mysql-bin.000017  mysql-bin.000028  mysql-bin.000039  mysql-bin.000050    promo3_report            shake_promo
+ib_logfile1  mysql-bin.000007  mysql-bin.000018  mysql-bin.000029  mysql-bin.000040  mysql-bin.000051    promo_test               sys_core
+ka_lightapp  mysql-bin.000008  mysql-bin.000019  mysql-bin.000030  mysql-bin.000041  mysql-bin.index     rtmap@002dcoupon         template_platform
+mt           mysql-bin.000009  mysql-bin.000020  mysql-bin.000031  mysql-bin.000042  mysql.sock          rtmap_dsp_1@002e0@002e0  <span class="nb">test
+</span>mtp          mysql-bin.000010  mysql-bin.000021  mysql-bin.000032  mysql-bin.000043  ouya                rtmap_framework          vter
+mysql        mysql-bin.000011  mysql-bin.000022  mysql-bin.000033  mysql-bin.000044  performance_schema  rtmap_game               wisdom_map
+<span class="o">[</span>root@centos1 mysql]# ls
+<span class="c"># 查看最近bin-log修改时间</span>
+</code></pre>
+    </div>
+  </li>
+  <li>确定哪些bin-log文件是和被删除库相关的
+根据查看最近的bin-log文件的修改时间，确定了mysql-bin.000045 mysql-bin.000046 mysql-bin.000047 mysql-bin.000048，如果这个方法行不通那就只能是根据bin-log文件转换成sql文件后，用grep管道或者less进行匹配你想看的库或表
+    <div class="language-shell highlighter-rouge"><pre class="highlight"><code>mysqlbinlog /var/lib/mysql/mysql-bin.000048 &gt; /opt/backup/000048.sql
+</code></pre>
+    </div>
+  </li>
+  <li>确定删除表的position
+    <div class="language-shell highlighter-rouge"><pre class="highlight"><code>less 000048.sql
+<span class="c"># shift+G定位到最后，然后利用J/K键进行定位，最终定位结果是end_log_pos = 870195071 和 时间点 2017-04-12 10:15:52</span>
+<span class="c"># at 870194939</span>
+<span class="c">#170412 10:15:52 server id 1  end_log_pos 870195071 CRC32 0x4004aa5a    Query   thread_id=9851  exec_time=0     error_code=0</span>
+SET <span class="nv">TIMESTAMP</span><span class="o">=</span>1491963352/<span class="k">*</span>!<span class="k">*</span>/;
+SET @@session.foreign_key_checks<span class="o">=</span>0, @@session.unique_checks<span class="o">=</span>0/<span class="k">*</span>!<span class="k">*</span>/;
+SET @@session.sql_mode<span class="o">=</span>1608515584/<span class="k">*</span>!<span class="k">*</span>/;
+/<span class="k">*</span>!<span class="se">\C</span> utf8 <span class="k">*</span>//<span class="k">*</span>!<span class="k">*</span>/;
+SET @@session.character_set_client<span class="o">=</span>33,@@session.collation_connection<span class="o">=</span>33,@@session.collation_server<span class="o">=</span>45/<span class="k">*</span>!<span class="k">*</span>/;
+ALTER SCHEMA <span class="sb">`</span>rts_1.0.0<span class="sb">`</span>  DEFAULT COLLATE utf8mb4_general_ci
+/<span class="k">*</span>!<span class="k">*</span>/;
+<span class="c"># at 870195071</span>
+<span class="c">#170412 10:15:52 server id 1  end_log_pos 870195220 CRC32 0x7e25daa0    Query   thread_id=9851  exec_time=0     error_code=0</span>
+use <span class="sb">`</span>rts_1.0.0<span class="sb">`</span>/<span class="k">*</span>!<span class="k">*</span>/;
+SET <span class="nv">TIMESTAMP</span><span class="o">=</span>1491963352/<span class="k">*</span>!<span class="k">*</span>/;
+DROP TABLE IF EXISTS <span class="sb">`</span>t_rts_enterprise<span class="sb">`</span> /<span class="k">*</span> generated by server <span class="k">*</span>/
+/<span class="k">*</span>!<span class="k">*</span>/;
+</code></pre>
+    </div>
+    <p>注意：end_log_pos = 870195071 和 时间点 2017-04-12 10:15:52 相当重要，后续需要用它来做恢复点</p>
+  </li>
+  <li>利用bin-log开始恢复或者mysqlbinlog转换成sql恢复
+```shell
+[root@centos1 backup]# mysqlbinlog –help</li>
+</ol>
+
+<h1 id="按时间点恢复">按时间点恢复</h1>
+<p>mysqlbinlog -d rts_1.0.0 –stop-datetime=”2017-04-12 10:15:52” mysql-bin.000045 mysql-bin.000046 mysql-bin.000047 mysql-bin.000048 | mysql -uroot-p</p>
+
+<h1 id="按position恢复">按position恢复</h1>
+<p>mysqlbinlog -d rts_1.0.0 –end-position=”870195071” mysql-bin.000045 mysql-bin.000046 mysql-bin.000047 mysql-bin.000048 | mysql -uroot-p</p>
+<div class="highlighter-rouge"><pre class="highlight"><code>
+```shell
+# 导出sql
+mysqlbinlog -d rts_1.0.0 --stop-datetime="2017-04-12 10:15:52" mysql-bin.000045 mysql-bin.000046 mysql-bin.000047 mysql-bin.000048 &gt; /opt/backup/backup0412.sql
+# 恢复sql
+mysql -u root -p &lt; /opt/backup/backup0412.sql
+</code></pre>
+</div>
+
+<ol>
+  <li>恢复期间遇到的问题</li>
+</ol>
+
+<p>5.1 mysqlbinlog命令执行失败,检查/etc/my.cnf [client] 下
+注释default-character-set=utf8
+5.2 mysqlbinlog在对function恢复时，发生错误中断了恢复操作，需要在/etc/my.cnf里的[mysqld]下加入
+log_bin_trust_function_creators = 1</p>
+
+<h3 id="总结">总结</h3>
+<ol>
+  <li>每次操作数据库表需要慎重，杜绝事故发生，建立不同权限的用户，规范使用用户名</li>
+  <li>做好日常备份
+```shell
+    <h1 id="autobackupmysqlsh">autoBackupMysql.sh</h1>
+    <p>#!/bin/bash
+backup_dir=/opt/backup/mysql/
+database=–all-databases
+dbStruct=all-stuct
+dbData=all-data
+DATE=<code class="highlighter-rouge">date +%Y%m%d%H%m%s</code>
+dumpStructFile=$backup_dir$dbStruct-$DATE.sql
+dumpDataFile=$backup_dir$dbData-$DATE.sql</p>
+    <h1 id="backup-table-struct">backup table struct</h1>
+    <p>/usr/bin/mysqldump -uroot -proot –default-character-set=utf8 –opt -d $database &gt; $dumpStructFile</p>
+    <h1 id="backup-table-data">backup table data</h1>
+    <p>/usr/bin/mysqldump -uroot -proot –default-character-set=utf8 -t $database &gt; $dumpDataFile</p>
+  </li>
+</ol>
+
+<h1 id="exit">exit</h1>
+<p>chmod +x autoBackupMysql.sh</p>
+<div class="highlighter-rouge"><pre class="highlight"><code>然后加入crontab启动计划里
+```shell
+crontab -e
+# 分　时　日　月　周
+0 0 * * * /root/shell/autoBackupMysql.sh
+</code></pre>
+</div>
+<p><img src="http://img.blog.csdn.net/20160804170302727" alt="crontab格式说明" /></p>
+
+    </article>
+    <div class="share">
+      <div class="share-component"></div>
+    </div>
+    <div class="comment">
+      
+  
+      
+        
+        <!-- Disqus Protection, see https://github.com/mzlogin/mzlogin.github.io/issues/2 -->
+        
+        
+          <div id="disqus_thread"></div>
+          <script>
+            var disqus_config = function () {
+              this.page.url = 'http://localhost:4000/2017/04/12/mysql%E8%AF%AF%E5%88%A0%E5%BA%93%E8%A1%A8%E5%90%8E%E6%81%A2%E5%A4%8D/';
+              this.page.identifier = '/2017/04/12/mysql%E8%AF%AF%E5%88%A0%E5%BA%93%E8%A1%A8%E5%90%8E%E6%81%A2%E5%A4%8D/';
+              this.page.title = 'Mysql误删库表后数据恢复';
+            };
+            (function() { // DON'T EDIT BELOW THIS LINE
+              var d = document, s = d.createElement('script');
+
+              s.type = 'text/javascript';
+              s.async = true;
+              var shortname = 'hunter-github-io';
+
+              s.src = '//' + shortname + '.disqus.com/embed.js';
+
+              s.setAttribute('data-timestamp', +new Date());
+              (d.head || d.body).appendChild(s);
+            })();
+          </script>
+          <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+        
+      
+    
+
+
+    </div>
+  </div>
+  <div class="column one-fourth">
+    
+<h3>Search</h3>
+<div id="site_search">
+    <input type="text" id="search_box" placeholder="Search">
+    <button class="btn btn-default" id="site_search_do"><span class="octicon octicon-search"></span></button>
+</div>
+
+<ul id="search_results"></ul>
+
+<link rel="stylesheet" type="text/css" href="/assets/css/modules/sidebar-search.css">
+<script src="/assets/js/lunr.min.js"></script>
+<script src="/assets/js/search.js"></script>
+
+
+    
+<h3>Post Directory</h3>
+<div id="post-directory-module" class="mobile-hidden">
+  <section class="post-directory">
+  <!-- Links that trigger the jumping -->
+  <!-- Added by javascript below -->
+  <dl></dl>
+  </section>
+</div>
+
+<script src="/assets/js/jquery.toc.js"></script>
+
+  </div>
+</div>
+</section>
+<!-- /section.content -->
+
+    <footer class="container">
+        <div class="site-footer" role="contentinfo">
+            <div class="copyright left mobile-block">
+                    © <script>document.write(new Date().getFullYear())</script>
+                    <span title="胡宗涛">胡宗涛</span>
+                    <a href="javascript:window.scrollTo(0,0)" class="right mobile-visible">TOP</a>
+            </div>
+
+            <ul class="site-footer-links right mobile-hidden">
+                <li>
+                    <a href="javascript:window.scrollTo(0,0)" >TOP</a>
+                </li>
+            </ul>
+            <a href="https://github.com/huzongtao/huzongtao.github.io" target="_blank" aria-label="view source code">
+                <span class="mega-octicon octicon-mark-github" title="GitHub"></span>
+            </a>
+            <ul class="site-footer-links mobile-hidden">
+                
+                <li>
+                    <a href="/" title="首页" target="">首页</a>
+                </li>
+                
+                <li>
+                    <a href="/categories/" title="分类" target="">分类</a>
+                </li>
+                
+                <li>
+                    <a href="/MySkillTree/" title="我的技能树" target="">我的技能树</a>
+                </li>
+                
+                <li>
+                    <a href="/about/" title="关于我" target="">关于我</a>
+                </li>
+                
+                <li><a href="/feed.xml"><span class="octicon octicon-rss" style="color:orange;"></span></a></li>
+            </ul>
+
+        </div>
+    </footer>
+    <!-- / footer -->
+    <script src="/assets/vendor/share.js/dist/js/share.min.js"></script>
+    <script src="/assets/js/geopattern.js"></script>
+    <script src="/assets/js/prism.js"></script>
+    <link rel="stylesheet" href="/assets/css/globals/prism.css">
+    <script>
+      jQuery(document).ready(function($) {
+        // geopattern
+        $('.geopattern').each(function(){
+          $(this).geopattern($(this).data('pattern-id'));
+        });
+       // hljs.initHighlightingOnLoad();
+      });
+    </script>
+    
+</body>
+</html>

@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="google-site-verification" content="KrB23GIOU5WYje5ZqEg8Hr4GAb5rr3FHbCBVfbzfvOQ" />
-    <title>SpringMVC DispatcherServlet调度过程 &mdash; 可口不可乐</title>
+    <title>CentOS-6.x 安装Supervisor并开机启动 &mdash; 可口不可乐</title>
     <link rel="stylesheet" href="/assets/vendor/primer-css/css/primer.css">
     <link rel="stylesheet" href="/assets/vendor/primer-markdown/dist/user-content.min.css">
     <link rel="stylesheet" href="/assets/vendor/octicons/octicons/octicons.css">
@@ -22,28 +22,28 @@
     
 
     
-    <link rel="canonical" href="http://localhost:4000/2017/03/21/DispatcherServlet%E8%B0%83%E5%BA%A6%E8%BF%87%E7%A8%8B/">
+    <link rel="canonical" href="http://localhost:4000/2017/04/11/Centos6.x%E5%AE%89%E8%A3%85supervisor%E5%B9%B6%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8/">
     <link rel="alternate" type="application/atom+xml" title="可口不可乐" href="/feed.xml">
     <link rel="shortcut icon" href="/favicon.ico">
     
-    <meta property="og:title" content="SpringMVC DispatcherServlet调度过程">
+    <meta property="og:title" content="CentOS-6.x 安装Supervisor并开机启动">
       
     <meta name="keywords" content="胡宗涛,博客">
     <meta name="og:keywords" content="胡宗涛,博客">
       
-    <meta name="description" content="请求响应DispatcherServlet处理流程总结应该如何看源码：```wiki  根据Servlet生命周期(init/service/destroy) 从顶层往下逐个深入，Servlet-HttpServletBean-FrameworkServlet-DispatcherServlet">
-    <meta name="og:description" content="请求响应DispatcherServlet处理流程总结应该如何看源码：```wiki  根据Servlet生命周期(init/service/destroy) 从顶层往下逐个深入，Servlet-HttpServletBean-FrameworkServlet-DispatcherServlet">
+    <meta name="description" content="supervisor安装方法一python -V2.6.6yum install epel* python python-pip -yeasy_install supervisorecho_supervisord_conf &gt; /etc/supervisord.conf">
+    <meta name="og:description" content="supervisor安装方法一python -V2.6.6yum install epel* python python-pip -yeasy_install supervisorecho_supervisord_conf &gt; /etc/supervisord.conf">
       
     
     
         
     
-    <meta property="og:url" content="http://localhost:4000/2017/03/21/DispatcherServlet%E8%B0%83%E5%BA%A6%E8%BF%87%E7%A8%8B/">
+    <meta property="og:url" content="http://localhost:4000/2017/04/11/Centos6.x%E5%AE%89%E8%A3%85supervisor%E5%B9%B6%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8/">
     <meta property="og:site_name" content="可口不可乐">
     <meta property="og:type" content="article">
     <meta property="og:locale" content="zh_CN" />
     
-    <meta property="article:published_time" content="2017-03-21">
+    <meta property="article:published_time" content="2017-04-11">
     
     <script src="/assets/vendor/jquery/dist/jquery.min.js"></script>
     <script src="/assets/js/jquery-ui.js"></script>
@@ -82,22 +82,22 @@
     </header>
     <!-- / header -->
 
-    <section class="collection-head small geopattern" data-pattern-id="SpringMVC Dispa">
+    <section class="collection-head small geopattern" data-pattern-id="CentOS-6.x 安装Su">
 <div class="container">
   <div class="columns">
     <div class="column three-fourths">
       <div class="collection-title">
-        <h1 class="collection-header">SpringMVC DispatcherServlet调度过程</h1>
+        <h1 class="collection-header">CentOS-6.x 安装Supervisor并开机启动</h1>
         <div class="collection-info">
           
           <span class="meta-info">
-            <span class="octicon octicon-calendar"></span> 2017/03/21
+            <span class="octicon octicon-calendar"></span> 2017/04/11
           </span>
           
           
           <span class="meta-info">
             <span class="octicon octicon-file-directory"></span>
-            <a href="/categories/#SpringMVC" title="SpringMVC">SpringMVC</a>
+            <a href="/categories/#Linux" title="Linux">Linux</a>
           </span>
           
         </div>
@@ -111,125 +111,124 @@
 <div class="columns">
   <div class="column three-fourths" >
     <article class="article-content markdown-body">
-    <h2 id="请求响应dispatcherservlet处理流程">请求响应DispatcherServlet处理流程</h2>
-<h3 id="总结应该如何看源码">总结应该如何看源码：</h3>
-<pre><code class="language-wiki">1. 根据Servlet生命周期(init/service/destroy) 从顶层往下逐个深入，Servlet-HttpServletBean-FrameworkServlet-DispatcherServlet
+    <h2 id="supervisor安装">supervisor安装</h2>
+<h3 id="方法一">方法一</h3>
+<p>python -V
+2.6.6
+yum install epel* python python-pip -y
+easy_install supervisor
+echo_supervisord_conf &gt; /etc/supervisord.conf</p>
 
-2. 根据具体RequestMapper接口服务地址，开启debug模式，把断点放置doService方法内，跟踪代码一步步深入理解从请求到响应，DispatcherServlet的调度原理
-</code></pre>
-
-<h3 id="大概的调用流程">大概的调用流程</h3>
-<ol>
-  <li>获得HandlerMapping</li>
-  <li>获得HandlerExecutionChain</li>
-  <li>获得HandleAdapter适配器</li>
-  <li>检测并注册Handler的拦截器</li>
-  <li>请求参数绑定</li>
-  <li>初始化视图容器</li>
-  <li>handle反射调用Controller method</li>
-  <li>装载ModelAndView</li>
-  <li>适配ModelAndView
-```java
-// 开始调度
-protected DispatcherServlet.doDispatch(HttpServletRequest request, HttpServletResponse response)</li>
-</ol>
-
-<p>// 遍历已初始化的 请求处理器集合(List<HandlerMapping> handlerMappings） 得到一个Handler执行器
-// RequestMappingHandleMapping  SimpleUrlHandleMapping  BeanNameUrlHandleMapping
-// 加载context.getBean()获取 HandlerExecutionChain
-protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception</HandlerMapping></p>
-
-<p>// 到这就已经确定该调用哪个Controller.method以及return类型
-// HandlerExecutionChain mappedHandler执行链，获取HandleAdapter适配器
-HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());</p>
-
-<p>// Apply preHandle methods of registered interceptors. 检测并注册Handler的拦截器
-boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response)</p>
-
-<p>// 开始调用Controller.method
-ModelAndView mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
-// 下面是真正开始调用handler的过程
-  /**
-	 * Invoke the {@link RequestMapping} handler method preparing a {@link ModelAndView}
-	 * if view resolution is required.
-	 * @since 4.2
-	 * @see #createInvocableHandlerMethod(HandlerMethod)
-	 */
-	protected ModelAndView invokeHandlerMethod(HttpServletRequest request,
-			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {</p>
-
-<div class="highlighter-rouge"><pre class="highlight"><code>	ServletWebRequest webRequest = new ServletWebRequest(request, response);
-	try {
-  // 请求参数绑定
-		WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
-		ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
-  // 初始化 反射调用handler
-		ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
-		invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-		invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
-		invocableMethod.setDataBinderFactory(binderFactory);
-		invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-  // 初始化 视图容器
-		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-		mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
-		modelFactory.initModel(webRequest, mavContainer, invocableMethod);
-		mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
-
-		AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
-		asyncWebRequest.setTimeout(this.asyncRequestTimeout);
-
-		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		asyncManager.setTaskExecutor(this.taskExecutor);
-		asyncManager.setAsyncWebRequest(asyncWebRequest);
-		asyncManager.registerCallableInterceptors(this.callableInterceptors);
-		asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
-
-		if (asyncManager.hasConcurrentResult()) {
-			Object result = asyncManager.getConcurrentResult();
-			mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
-			asyncManager.clearConcurrentResult();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Found concurrent result value [" + result + "]");
-			}
-			invocableMethod = invocableMethod.wrapConcurrentResult(result);
-		}
-  // 反射invoke执行Controller里的method，并把结果装载进mavContainer
-		invocableMethod.invokeAndHandle(webRequest, mavContainer);
-		if (asyncManager.isConcurrentHandlingStarted()) {
-			return null;
-		}
-  // 匹配合适的ModelAndView
-		return getModelAndView(mavContainer, modelFactory, webRequest);
-	}
-	finally {
-		webRequest.requestCompleted();
-	}
-} // 匹配ModelAndView视图 private ModelAndView getModelAndView(ModelAndViewContainer mavContainer,
-		ModelFactory modelFactory, NativeWebRequest webRequest) throws Exception {
-
-	modelFactory.updateModel(webRequest, mavContainer);
-// 对于Restful API 直接return null
-	if (mavContainer.isRequestHandled()) {
-		return null;
-	}
-	ModelMap model = mavContainer.getModel();
-	ModelAndView mav = new ModelAndView(mavContainer.getViewName(), model, mavContainer.getStatus());
-	if (!mavContainer.isViewReference()) {
-		mav.setView((View) mavContainer.getView());
-	}
-	if (model instanceof RedirectAttributes) {
-		Map&lt;String, ?&gt; flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
-		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
-		RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);
-	}
-	return mav;
-}
+<h3 id="方法二">方法二</h3>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py
+python get-pip.py
 </code></pre>
 </div>
 
-<p>//
-//
-```</p>
+<h2 id="配置和常用命令">配置和常用命令</h2>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="c"># 声明配置文件</span>
+supervisord -c /etc/supervisord.conf
+<span class="c"># 编辑</span>
+vim supervisor.conf
+<span class="c"># 指定自定义配置统一目录</span>
+<span class="c"># [include]</span>
+<span class="c"># files = /etc/supervisor_config/*.ini</span>
+<span class="c"># 去掉注释“#” 并指定自定义脚本目录</span>
+
+<span class="c"># 添加一个脚本</span>
+<span class="o">[</span>program:zookeeper]
+<span class="nb">command</span><span class="o">=</span>/opt/soft/zookeeper-3.4.9/bin/zkServer.sh start-foreground
+<span class="nv">user</span><span class="o">=</span>root
+<span class="nv">autostart</span><span class="o">=</span><span class="nb">true
+</span><span class="nv">autorestart</span><span class="o">=</span><span class="nb">true
+</span><span class="nv">startsecs</span><span class="o">=</span>3
+
+<span class="c"># 启动zookeeper服务</span>
+supervisorctl <span class="o">[</span>start|stop|restart] zookeeper
+</code></pre>
+</div>
+
+<p>注意事项：
+保持supervisord.conf的默认配置不要做任何修改
+有错误时查看
+tailf /tmp/supervisord.log</p>
+
+<h2 id="可能遇到的问题">可能遇到的问题</h2>
+<p>新增tomcat的守护脚本后：
+exited: tomcat (exit status 0; not expected)
+exited: tomcat (exit status 127; not expected)   <br />
+都是和command执行命令错误有关系！
+比如tomcat的启动方式为：catalina.sh run 否则报上述第一种错误
+也不要用startup.sh的方式启动，否则报第二种错误</p>
+
+<h2 id="开机自启脚本">开机自启脚本</h2>
+
+<p><a href="http://serverfault.com/questions/96499/how-to-automatically-start-supervisord-on-linux-ubuntu">how-to-automatic-start-supervsord</a>
+/etc/rc.d/init.d/supervisord</p>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code><span class="c">#!/bin/sh</span>
+<span class="c">#</span>
+<span class="c"># /etc/rc.d/init.d/supervisord</span>
+<span class="c">#</span>
+<span class="c"># Supervisor is a client/server system that</span>
+<span class="c"># allows its users to monitor and control a</span>
+<span class="c"># number of processes on UNIX-like operating</span>
+<span class="c"># systems.</span>
+<span class="c">#</span>
+<span class="c"># chkconfig: - 64 36</span>
+<span class="c"># description: Supervisor Server</span>
+<span class="c"># processname: supervisord</span>
+
+<span class="c"># Source init functions</span>
+. /etc/rc.d/init.d/functions
+
+<span class="nv">prog</span><span class="o">=</span><span class="s2">"supervisord"</span>
+
+<span class="nv">prefix</span><span class="o">=</span><span class="s2">"/usr/"</span>
+<span class="nv">exec_prefix</span><span class="o">=</span><span class="s2">"</span><span class="k">${</span><span class="nv">prefix</span><span class="k">}</span><span class="s2">"</span>
+<span class="nv">prog_bin</span><span class="o">=</span><span class="s2">"</span><span class="k">${</span><span class="nv">exec_prefix</span><span class="k">}</span><span class="s2">/bin/supervisord"</span>
+<span class="nv">PIDFILE</span><span class="o">=</span><span class="s2">"/var/run/</span><span class="nv">$prog</span><span class="s2">.pid"</span>
+
+start<span class="o">()</span>
+<span class="o">{</span>
+        <span class="nb">echo</span> -n <span class="s2">$"Starting </span><span class="nv">$prog</span><span class="s2">: "</span>
+        daemon <span class="nv">$prog_bin</span> --pidfile <span class="nv">$PIDFILE</span>
+        <span class="o">[</span> -f <span class="nv">$PIDFILE</span> <span class="o">]</span> <span class="o">&amp;&amp;</span> success <span class="s2">$"</span><span class="nv">$prog</span><span class="s2"> startup"</span> <span class="o">||</span> failure <span class="s2">$"</span><span class="nv">$prog</span><span class="s2"> startup"</span>
+        <span class="nb">echo</span>
+<span class="o">}</span>
+
+stop<span class="o">()</span>
+<span class="o">{</span>
+        <span class="nb">echo</span> -n <span class="s2">$"Shutting down </span><span class="nv">$prog</span><span class="s2">: "</span>
+        <span class="o">[</span> -f <span class="nv">$PIDFILE</span> <span class="o">]</span> <span class="o">&amp;&amp;</span> killproc <span class="nv">$prog</span> <span class="o">||</span> success <span class="s2">$"</span><span class="nv">$prog</span><span class="s2"> shutdown"</span>
+        <span class="nb">echo</span>
+<span class="o">}</span>
+
+<span class="k">case</span> <span class="s2">"</span><span class="nv">$1</span><span class="s2">"</span> <span class="k">in
+  </span>start<span class="p">)</span>
+    start
+  <span class="p">;;</span>
+  stop<span class="p">)</span>
+    stop
+  <span class="p">;;</span>
+  status<span class="p">)</span>
+        status <span class="nv">$prog</span>
+  <span class="p">;;</span>
+  restart<span class="p">)</span>
+    stop
+    start
+  <span class="p">;;</span>
+  <span class="k">*</span><span class="p">)</span>
+    <span class="nb">echo</span> <span class="s2">"Usage: </span><span class="nv">$0</span><span class="s2"> {start|stop|restart|status}"</span>
+  <span class="p">;;</span>
+<span class="k">esac</span>
+</code></pre>
+</div>
+<p>关于开机自启命令</p>
+<div class="language-shell highlighter-rouge"><pre class="highlight"><code>chkconfig --add supervisord
+chkconfig supervisord --level 345 on
+chmod +x /etc/init.d/supervisord
+</code></pre>
+</div>
 
     </article>
     <div class="share">
@@ -246,9 +245,9 @@ ModelAndView mv = ha.handle(processedRequest, response, mappedHandler.getHandler
           <div id="disqus_thread"></div>
           <script>
             var disqus_config = function () {
-              this.page.url = 'http://localhost:4000/2017/03/21/DispatcherServlet%E8%B0%83%E5%BA%A6%E8%BF%87%E7%A8%8B/';
-              this.page.identifier = '/2017/03/21/DispatcherServlet%E8%B0%83%E5%BA%A6%E8%BF%87%E7%A8%8B/';
-              this.page.title = 'SpringMVC DispatcherServlet调度过程';
+              this.page.url = 'http://localhost:4000/2017/04/11/Centos6.x%E5%AE%89%E8%A3%85supervisor%E5%B9%B6%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8/';
+              this.page.identifier = '/2017/04/11/Centos6.x%E5%AE%89%E8%A3%85supervisor%E5%B9%B6%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8/';
+              this.page.title = 'CentOS-6.x 安装Supervisor并开机启动';
             };
             (function() { // DON'T EDIT BELOW THIS LINE
               var d = document, s = d.createElement('script');
