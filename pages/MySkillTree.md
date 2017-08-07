@@ -15,10 +15,8 @@ golang
 dubbo
 SpringMVC
 Mybatis
-JPA
 Spring Boot
 Spring Cloud
-Docker
 Netty
 JFinal
 分布式开源软件:
@@ -31,11 +29,9 @@ Mongodb
 Memcached
 MySQL
 Tomcat
-Flume
 SpringMVC
 Storm
 Flume
-Netty
 
 ### 性能监控
 VisualVM
@@ -47,7 +43,6 @@ Jmeter
 Git
 Svn
 Jenkins
-Jira
 Confluence
 
 ### 测试:
