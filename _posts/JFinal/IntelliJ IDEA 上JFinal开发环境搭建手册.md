@@ -1,3 +1,10 @@
+---
+layout: post
+title: IntelliJ IDEA上JFinal开发环境搭建手册
+categories: JFinal
+description: IntelliJ IDEA上JFinal开发环境搭建手册
+---
+
 JFinal官方的教程都是使用Eclipse进行开发的，而使用Intellij IDEA来做开发，不少地方和Eclipse区别还是很大的。
 
 本文参考了网上不少文章，主要沿用了网友的内容，一步一步做了尝试后记录下来，感谢万能的互联网。
@@ -371,4 +378,3 @@ Intellij IDEA打包的war文件位于项目根目录的out目录下。
 把此文件拷贝到tomcat的webapps目录下(可以改名，例如改名为test.war),无需做任何修改，启动tomcat后，直接访问：[http://ip:8080/test/](http://ip:8080/test/)即可正常访问页面。
 
 要更改输出目录，请在【File】-【Project Structure】-【Project】标签页修改即可。
-
