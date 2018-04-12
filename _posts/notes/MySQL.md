@@ -1,7 +1,7 @@
 ---
 layout: post
 title: MySQL
-categories: gitHub搜集资料
+categories: notes
 description: MySQL
 keywords: keyword1, keyword2
 ---

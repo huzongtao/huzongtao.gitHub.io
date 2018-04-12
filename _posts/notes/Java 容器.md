@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Java容器
-categories: gitHub搜集资料
+categories: notes
 description: Java容器
 keywords: keyword1, keyword2
 ---

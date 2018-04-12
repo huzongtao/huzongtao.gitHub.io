@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Java并发
-categories: gitHub搜集资料
+categories: notes
 description: Java并发
 keywords: keyword1, keyword2
 ---

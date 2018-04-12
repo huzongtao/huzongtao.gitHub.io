@@ -1,7 +1,7 @@
 ---
 layout: post
 title: HTTP
-categories: gitHub搜集资料
+categories: notes
 description: HTTP
 keywords: keyword1, keyword2
 ---

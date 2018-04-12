@@ -1,7 +1,7 @@
 ---
 layout: post
 title: LeetCode题解
-categories: gitHub搜集资料
+categories: notes
 description: LeetCode题解
 keywords: keyword1, keyword2
 ---

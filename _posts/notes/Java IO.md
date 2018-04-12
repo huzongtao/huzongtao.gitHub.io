@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Java IO
-categories: gitHub搜集资料
+categories: notes
 description: Java IO
 keywords: keyword1, keyword2
 ---

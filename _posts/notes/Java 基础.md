@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Java基础
-categories: gitHub搜集资料
+categories: notes
 description: Java基础
 keywords: keyword1, keyword2
 ---

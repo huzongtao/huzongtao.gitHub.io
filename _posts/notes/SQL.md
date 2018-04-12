@@ -1,7 +1,7 @@
 ---
 layout: post
 title: SQL
-categories: gitHub搜集资料
+categories: notes
 description: SQL
 keywords: keyword1, keyword2
 ---

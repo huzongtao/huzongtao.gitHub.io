@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Git
-categories: gitHub搜集资料
+categories: notes
 description: git详解
 keywords: keyword1, keyword2
 ---

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: 剑指offer题解
-categories: gitHub搜集资料
+categories: notes
 description: 剑指offer题解
 keywords: keyword1, keyword2
 ---

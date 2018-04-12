@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Redis
-categories: gitHub搜集资料
+categories: notes
 description: Redis
 keywords: keyword1, keyword2
 ---

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Java 虚拟机
-categories: gitHub搜集资料
+categories: notes
 description: Java虚拟机
 keywords: keyword1, keyword2
 ---

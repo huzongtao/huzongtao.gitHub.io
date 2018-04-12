@@ -1,7 +1,7 @@
 ---
 layout: post
 title: JDK中的设计模式
-categories: gitHub搜集资料
+categories: notes
 description: JDK中的设计模式
 keywords: keyword1, keyword2
 ---
