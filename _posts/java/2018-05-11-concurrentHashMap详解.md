@@ -48,6 +48,7 @@ ConcurrentHashMap的get操作跟HashMap类似，只是ConcurrentHashMap第一次
 
 ### size操作
 计算ConcurrentHashMap的元素大小是一个有趣的问题，因为他是并发操作的，就是在你计算size的时候，他还在并发的插入数据，可能会导致你计算出来的size和你实际的size有相差（在你return size的时候，插入了多个数据），要解决这个问题，JDK7版本用两种方案。
+
 ```java
 try {
     for (;;) {
@@ -442,8 +443,8 @@ final Node<K,V>[] helpTransfer(Node<K,V>[] tab, Node<K,V> f) {
 }
 ```
 其实helpTransfer（）方法的目的就是调用多个工作线程一起帮助进行扩容，这样的效率就会更高，而不是只有检查到要扩容的那个线程进行扩容操作，其他线程就要等待扩容操作完成才能工作。
+既然这里涉及到扩容的操作，我们也一起来看看扩容方法transfer()
 
-既然这里涉及到扩容的操作，我们也一起来看看扩容方法transfer（）
 ```java
 private final void transfer(Node<K,V>[] tab, Node<K,V>[] nextTab) {
         int n = tab.length, stride;
@@ -597,12 +598,17 @@ private final void transfer(Node<K,V>[] tab, Node<K,V>[] nextTab) {
             }
         }
     }
-    ```
+```
+
 扩容过程有点复杂，这里主要涉及到多线程并发扩容,ForwardingNode的作用就是支持扩容操作，将已处理的节点和空节点置为ForwardingNode，并发处理时多个线程经过ForwardingNode就表示已经遍历了，就往后遍历，下图是多线程合作扩容的过程：
+
 
 ![concurrentHashMap3](/assets/achives/images/concurrentHashMap3.png)
 
+
 介绍完扩容过程，我们再次回到put流程，在第四步中是向链表或者红黑树里加节点，到第五步，会调用treeifyBin（）方法进行链表转红黑树的过程。
+
+
 ```java
 private final void treeifyBin(Node<K,V>[] tab, int index) {
     Node<K,V> b; int n, sc;
