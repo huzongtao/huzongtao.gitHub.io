@@ -1,7 +1,7 @@
 ---
 layout: post
 title: ConcurrentHashMap详解
-categories: [java]
+categories: java
 description: ConcurrentHashMap详解
 keywords: keyword1, keyword2
 ---
