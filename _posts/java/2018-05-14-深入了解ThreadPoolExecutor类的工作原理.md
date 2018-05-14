@@ -13,18 +13,18 @@ java.uitl.concurrent.ThreadPoolExecutor类是线程池中最核心的一个类�
 　　在ThreadPoolExecutor类中提供了四个构造方法：
 
 ```java
-public class ThreadPoolExecutor extendsAbstractExecutorService {
+public class ThreadPoolExecutor extends AbstractExecutorService {
     .....
-    publicThreadPoolExecutor(intcorePoolSize,intmaximumPoolSize,longkeepAliveTime,TimeUnit unit,
+    public ThreadPoolExecutor(intcorePoolSize,intmaximumPoolSize,longkeepAliveTime,TimeUnit unit,
             BlockingQueue<Runnable> workQueue);
 
-    publicThreadPoolExecutor(intcorePoolSize,intmaximumPoolSize,longkeepAliveTime,TimeUnit unit,
+    public ThreadPoolExecutor(intcorePoolSize,intmaximumPoolSize,longkeepAliveTime,TimeUnit unit,
             BlockingQueue<Runnable> workQueue,ThreadFactory threadFactory);
 
-    publicThreadPoolExecutor(intcorePoolSize,intmaximumPoolSize,longkeepAliveTime,TimeUnit unit,
+    public ThreadPoolExecutor(intcorePoolSize,intmaximumPoolSize,longkeepAliveTime,TimeUnit unit,
             BlockingQueue<Runnable> workQueue,RejectedExecutionHandler handler);
 
-    publicThreadPoolExecutor(intcorePoolSize,intmaximumPoolSize,longkeepAliveTime,TimeUnit unit,
+    public ThreadPoolExecutor(intcorePoolSize,intmaximumPoolSize,longkeepAliveTime,TimeUnit unit,
         BlockingQueue<Runnable> workQueue,ThreadFactory threadFactory,RejectedExecutionHandler handler);
     ...
 }
@@ -38,7 +38,7 @@ public class ThreadPoolExecutor extendsAbstractExecutorService {
 * maximumPoolSize：线程池最大线程数，这个参数也是一个非常重要的参数，它表示在线程池中最多能创建多少个线程；
 * keepAliveTime：表示线程没有任务执行时最多保持多久时间会终止。默认情况下，只有当线程池中的线程数大于corePoolSize时，keepAliveTime才会起作用，直到线程池中的线程数不大于corePoolSize，即当线程池中的线程数大于corePoolSize时，如果一个线程空闲的时间达到keepAliveTime，则会终止，直到线程池中的线程数不超过corePoolSize。但是如果调用了allowCoreThreadTimeOut(boolean)方法，在线程池中的线程数不大于corePoolSize时，keepAliveTime参数也会起作用，直到线程池中的线程数为0;
 * unit：参数keepAliveTime的时间单位，有7种取值，在TimeUnit类中有7种静态属性：
-```html
+```java
 TimeUnit.DAYS;               //天
 TimeUnit.HOURS;             //小时
 TimeUnit.MINUTES;           //分钟
@@ -50,7 +50,7 @@ TimeUnit.NANOSECONDS;       //纳秒
 
 
 * workQueue：一个阻塞队列，用来存储等待执行的任务，这个参数的选择也很重要，会对线程池的运行过程产生重大影响，一般来说，这里的阻塞队列有以下几种选择：
-```html
+```Java
 ArrayBlockingQueue;
 LinkedBlockingQueue;
 SynchronousQueue;
@@ -74,29 +74,48 @@ ThreadPoolExecutor.CallerRunsPolicy：由调用线程处理该任务
 public abstract class AbstractExecutorService implements ExecutorService {
 
 
-    protected<T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) { };
-    protected<T> RunnableFuture<T> newTaskFor(Callable<T> callable) { };
-    publicFuture<?> submit(Runnable task) {};
-    public<T> Future<T> submit(Runnable task, T result) { };
-    public<T> Future<T> submit(Callable<T> task) { };
-    private<T> T doInvokeAny(Collection<? extendsCallable<T>> tasks,
+  protected<T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
+  };
+  protected<T>RunnableFuture<T> newTaskFor(Callable<T> callable) {
+  };
+
+  public Future<?> submit(Runnable task) {
+  };
+
+  public <T> Future<T> submit(Runnable task, T result) {
+  };
+
+  public <T> Future<T> submit(Callable<T> task) {
+  };
+
+  private <T> T doInvokeAny(Collection<? extends Callable<T>> tasks,
                             booleantimed, long nanos)
-        throwsInterruptedException, ExecutionException, TimeoutException {
-    };
-    public<T> T invokeAny(Collection<? extendsCallable<T>> tasks)
-        throwsInterruptedException, ExecutionException {
-    };
-    public<T> T invokeAny(Collection<? extendsCallable<T>> tasks,
-                           longtimeout, TimeUnit unit)
-        throwsInterruptedException, ExecutionException, TimeoutException {
-    };
-    public<T> List<Future<T>> invokeAll(Collection<? extendsCallable<T>> tasks)
-        throwsInterruptedException {
-    };
-    public<T> List<Future<T>> invokeAll(Collection<? extendsCallable<T>> tasks,
-                                         longtimeout, TimeUnit unit)
-        throwsInterruptedException {
-    };
+          throws InterruptedException, ExecutionException, TimeoutException {
+  };
+
+  public <T> T invokeAny(Collection<? extendsCallable<T>>tasks)
+          throws InterruptedException, ExecutionException {
+  }
+
+  ;
+
+  public <T> T invokeAny(Collection<? extendsCallable<T>>tasks,
+                         longtimeout, TimeUnit unit)
+
+  throwsInterruptedException,ExecutionException,TimeoutException
+
+  {
+  };
+
+  public <T> List<Future<T>> invokeAll(Collection<? extendsCallable<T>>tasks) throws InterruptedException{
+  };
+
+  public <T> List<Future<T>> invokeAll(Collection<? extendsCallable<T>>tasks,
+                                       longtimeout, TimeUnit unit)
+
+  throws InterruptedException
+
+  { };
 }
 ```
 
@@ -105,27 +124,27 @@ AbstractExecutorService是一个抽象类，它实现了ExecutorService接口。
 
 我们接着看ExecutorService接口的实现：
 ```Java
-public interface ExecutorService extendsExecutor {
+public interface ExecutorService extends Executor {
 
-    voidshutdown();
-    booleanisShutdown();
-    booleanisTerminated();
-    booleanawaitTermination(longtimeout, TimeUnit unit)
-        throwsInterruptedException;
+    void shutdown();
+    boolean isShutdown();
+    boolean isTerminated();
+    boolean awaitTermination(longtimeout, TimeUnit unit)
+        throws InterruptedException;
     <T> Future<T> submit(Callable<T> task);
     <T> Future<T> submit(Runnable task, T result);
     Future<?> submit(Runnable task);
     <T> List<Future<T>> invokeAll(Collection<?extends Callable<T>> tasks)
-        throwsInterruptedException;
+        throws InterruptedException;
     <T> List<Future<T>> invokeAll(Collection<?extends Callable<T>> tasks,
                                   longtimeout, TimeUnit unit)
-        throwsInterruptedException;
+        throws InterruptedException;
 
     <T> T invokeAny(Collection<?extends Callable<T>> tasks)
-        throwsInterruptedException, ExecutionException;
+        throws InterruptedException, ExecutionException;
     <T> T invokeAny(Collection<?extends Callable<T>> tasks,
                     longtimeout, TimeUnit unit)
-        throwsInterruptedException, ExecutionException, TimeoutException;
+        throws InterruptedException, ExecutionException, TimeoutException;
 }
 ```
 
@@ -204,9 +223,9 @@ runState表示当前线程池的状态，它是一个volatile变量用来保证�
 
 ```Java
 private final BlockingQueue<Runnable> workQueue;             //任务缓存队列，用来存放等待执行的任务
-private final ReentrantLock mainLock = newReentrantLock();   //线程池的主要状态锁，对线程池状态（比如线程池大小
+private final ReentrantLock mainLock = new ReentrantLock();   //线程池的主要状态锁，对线程池状态（比如线程池大小
                                                               //、runState等）的改变都要使用这个锁
-private final HashSet<Worker> workers = newHashSet<Worker>();  //用来存放工作集
+private final HashSet<Worker> workers = new HashSet<Worker>();  //用来存放工作集
 
 private volatile long  keepAliveTime;    //线程存货时间   
 private volatile boolean allowCoreThreadTimeOut;   //是否允许为核心线程设置存活时间
@@ -261,7 +280,7 @@ private long completedTaskCount;  //用来记录已经执行完毕的任务个�
 ```Java
 public void execute(Runnable command) {
     if(command == null)
-        thrownew NullPointerException();
+        throw new NullPointerException();
     if(poolSize >= corePoolSize || !addIfUnderCorePoolSize(command)) {
         if(runState == RUNNING && workQueue.offer(command)) {
             if(runState != RUNNING || poolSize == 0)
@@ -321,7 +340,7 @@ if (runState == RUNNING && workQueue.offer(command))
 ```Java
 private boolean addIfUnderCorePoolSize(Runnable firstTask) {
     Thread t =null;
-    finalReentrantLock mainLock = this.mainLock;
+    final ReentrantLock mainLock = this.mainLock;
     mainLock.lock();
     try{
         if(poolSize < corePoolSize && runState == RUNNING)
@@ -368,7 +387,7 @@ private Thread addThread(Runnable firstTask) {
 　　下面我们看一下Worker类的实现：
 
 ```Java
-private final class Workerimplements Runnable {
+private final class Worker implements Runnable {
     private final ReentrantLock runLock =new ReentrantLock();
     private Runnable firstTask;
     volatile long completedTasks;
@@ -376,10 +395,10 @@ private final class Workerimplements Runnable {
     Worker(Runnable firstTask) {
         this.firstTask = firstTask;
     }
-    booleanisActive() {
-        returnrunLock.isLocked();
+    boolean isActive() {
+        return runLock.isLocked();
     }
-    voidinterruptIfIdle() {
+    void interruptIfIdle() {
         final ReentrantLock runLock = this.runLock;
         if(runLock.tryLock()) {
             try{
@@ -412,7 +431,7 @@ private final class Workerimplements Runnable {
             }catch (RuntimeException ex) {
                 if(!ran)
                     afterExecute(task, ex);
-                throwex;
+                throw ex;
             }
         }finally {
             runLock.unlock();
@@ -468,17 +487,17 @@ public void run() {
             Runnable r;
             if(state == SHUTDOWN)  // Help drain queue
                 r = workQueue.poll();
-            elseif (poolSize > corePoolSize || allowCoreThreadTimeOut)//如果线程数大于核心池大小或者允许为核心池线程设置空闲时间，
+            else if (poolSize > corePoolSize || allowCoreThreadTimeOut)//如果线程数大于核心池大小或者允许为核心池线程设置空闲时间，
                 //则通过poll取任务，若等待一定的时间取不到任务，则返回null
                 r = workQueue.poll(keepAliveTime, TimeUnit.NANOSECONDS);
             else
                 r = workQueue.take();
             if(r != null)
-                returnr;
+                return r;
             if(workerCanExit()) {    //如果没取到任务，即r为null，则判断当前的worker是否可以退出
                 if(runState >= SHUTDOWN) // Wake up others
                     interruptIdleWorkers();  //中断处于空闲状态的worker
-                returnnull;
+                return null;
             }
             // Else retry
         }catch (InterruptedException ie) {
@@ -499,7 +518,7 @@ public void run() {
 private boolean workerCanExit() {
     final ReentrantLock mainLock = this.mainLock;
     mainLock.lock();
-    booleancanExit;
+    boolean canExit;
     //如果runState大于等于STOP，或者任务缓存队列为空了
     //或者  允许为核心池线程设置空闲存活时间并且线程池中的线程数目大于1
     try{
@@ -510,13 +529,13 @@ private boolean workerCanExit() {
     }finally {
         mainLock.unlock();
     }
-    returncanExit;
+    return canExit;
 }
 ```
 
  　　也就是说如果线程池处于STOP状态、或者任务队列已为空或者允许为核心池线程设置空闲存活时间并且线程数大于1时，允许worker退出。如果允许worker退出，则调用interruptIdleWorkers()中断处于空闲状态的worker，我们看一下interruptIdleWorkers()的实现：
  ```Java
- void interruptIdleWorkers() {
+  void interruptIdleWorkers() {
     final ReentrantLock mainLock = this.mainLock;
     mainLock.lock();
     try{
@@ -530,8 +549,8 @@ private boolean workerCanExit() {
 
  　　从实现可以看出，它实际上调用的是worker的interruptIfIdle()方法，在worker的interruptIfIdle()方法中：
 
- ```Java
- void interruptIfIdle() {
+  ```Java
+  void interruptIfIdle() {
     final ReentrantLock runLock = this.runLock;
     if(runLock.tryLock()) {    //注意这里，是调用tryLock()来获取锁的，因为如果当前worker正在执行任务，锁已经被获取了，是无法获取到锁的
                                 //如果成功获取了锁，说明当前worker处于空闲状态
@@ -548,8 +567,9 @@ private boolean workerCanExit() {
 这里有一个非常巧妙的设计方式，假如我们来设计线程池，可能会有一个任务分派线程，当发现有线程空闲时，就从任务缓存队列中取一个任务交给空闲线程执行。但是在这里，并没有采用这样的方式，因为这样会要额外地对任务分派线程进行管理，无形地会增加难度和复杂度，这里直接让执行完任务的线程去任务缓存队列里面取任务来执行。
 
 　　我们再看addIfUnderMaximumPoolSize方法的实现，这个方法的实现思想和addIfUnderCorePoolSize方法的实现思想非常相似，唯一的区别在于addIfUnderMaximumPoolSize方法是在线程池中的线程数达到了核心池大小并且往任务队列中添加任务失败的情况下执行的：
+
 ```Java
-private boolean addIfUnderMaximumPoolSize(Runnable firstTask) {
+  private boolean addIfUnderMaximumPoolSize(Runnable firstTask) {
     Thread t =null;
     final ReentrantLock mainLock = this.mainLock;
     mainLock.lock();
@@ -560,9 +580,9 @@ private boolean addIfUnderMaximumPoolSize(Runnable firstTask) {
         mainLock.unlock();
     }
     if(t == null)
-        returnfalse;
+        return false;
     t.start();
-    returntrue;
+    return true;
 }
 ```
 
@@ -644,10 +664,10 @@ ThreadPoolExecutor.CallerRunsPolicy：由调用线程处理该任务
 ```Java
 public class Test {
      public static void main(String[] args) {   
-         ThreadPoolExecutor executor =new ThreadPoolExecutor(5,10, 200, TimeUnit.MILLISECONDS,
-                 newArrayBlockingQueue<Runnable>(5));
+         ThreadPoolExecutor executor =new  ThreadPoolExecutor(5,10, 200, TimeUnit.MILLISECONDS,
+                 new ArrayBlockingQueue<Runnable>(5));
 
-         for(inti=0;i<15;i++){
+         for(int i=0;i<15;i++){
              MyTask myTask =new MyTask(i);
              executor.execute(myTask);
              System.out.println("线程池中线程数目："+executor.getPoolSize()+"，队列中等待执行的任务数目："+
@@ -666,7 +686,7 @@ class MyTask implements Runnable {
     }
 
     @Override
-    publicvoid run() {
+    public void run() {
         System.out.println("正在执行task "+taskNum);
         try{
             Thread.currentThread().sleep(4000);
@@ -784,8 +804,7 @@ public static ExecutorService newCachedThreadPool() {
 
 [http://ifeve.com/java-threadpool/](http://ifeve.com/java-threadpool/)
 
-[http://blog.163.com/among_1985/blog/static/275005232012618849266/
-](http://blog.163.com/among_1985/blog/static/275005232012618849266/)
+[http://blog.163.com/among_1985/blog/static/275005232012618849266/](http://blog.163.com/among_1985/blog/static/275005232012618849266/)
 
 [http://developer.51cto.com/art/201203/321885.htm](http://developer.51cto.com/art/201203/321885.htm)
 
