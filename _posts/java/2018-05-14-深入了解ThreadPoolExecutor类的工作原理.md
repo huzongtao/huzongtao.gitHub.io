@@ -74,48 +74,31 @@ ThreadPoolExecutor.CallerRunsPolicy：由调用线程处理该任务
 public abstract class AbstractExecutorService implements ExecutorService {
 
 
-  protected<T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
-  };
-  protected<T>RunnableFuture<T> newTaskFor(Callable<T> callable) {
-  };
+  protected<T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {};
+  protected<T>RunnableFuture<T> newTaskFor(Callable<T> callable) {};
 
-  public Future<?> submit(Runnable task) {
-  };
+  public Future<?> submit(Runnable task) {};
 
-  public <T> Future<T> submit(Runnable task, T result) {
-  };
+  public <T> Future<T> submit(Runnable task, T result) {};
 
-  public <T> Future<T> submit(Callable<T> task) {
-  };
+  public <T> Future<T> submit(Callable<T> task) {};
 
   private <T> T doInvokeAny(Collection<? extends Callable<T>> tasks,
-                            booleantimed, long nanos)
-          throws InterruptedException, ExecutionException, TimeoutException {
-  };
+                            boolean timed, long nanos)
+          throws InterruptedException, ExecutionException, TimeoutException {};
 
   public <T> T invokeAny(Collection<? extendsCallable<T>>tasks)
-          throws InterruptedException, ExecutionException {
-  }
+          throws InterruptedException, ExecutionException {};
 
-  ;
-
-  public <T> T invokeAny(Collection<? extendsCallable<T>>tasks,
-                         longtimeout, TimeUnit unit)
-
-  throwsInterruptedException,ExecutionException,TimeoutException
-
-  {
-  };
+  public <T> T invokeAny(Collection<? extendsCallable<T>>tasks,long timeout, TimeUnit unit)throws InterruptedException,ExecutionException,TimeoutException {};
 
   public <T> List<Future<T>> invokeAll(Collection<? extendsCallable<T>>tasks) throws InterruptedException{
   };
 
   public <T> List<Future<T>> invokeAll(Collection<? extendsCallable<T>>tasks,
-                                       longtimeout, TimeUnit unit)
+                                       long timeout, TimeUnit unit)
 
-  throws InterruptedException
-
-  { };
+  throws InterruptedException{};
 }
 ```
 
@@ -127,24 +110,25 @@ AbstractExecutorService是一个抽象类，它实现了ExecutorService接口。
 public interface ExecutorService extends Executor {
 
     void shutdown();
-    boolean isShutdown();
-    boolean isTerminated();
-    boolean awaitTermination(longtimeout, TimeUnit unit)
-        throws InterruptedException;
-    <T> Future<T> submit(Callable<T> task);
-    <T> Future<T> submit(Runnable task, T result);
-    Future<?> submit(Runnable task);
-    <T> List<Future<T>> invokeAll(Collection<?extends Callable<T>> tasks)
-        throws InterruptedException;
-    <T> List<Future<T>> invokeAll(Collection<?extends Callable<T>> tasks,
-                                  longtimeout, TimeUnit unit)
-        throws InterruptedException;
 
-    <T> T invokeAny(Collection<?extends Callable<T>> tasks)
-        throws InterruptedException, ExecutionException;
-    <T> T invokeAny(Collection<?extends Callable<T>> tasks,
-                    longtimeout, TimeUnit unit)
-        throws InterruptedException, ExecutionException, TimeoutException;
+    boolean isShutdown();
+
+    boolean isTerminated();
+
+    boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException;
+
+    <T> Future<T> submit(Callable<T> task);
+
+    <T> Future<T> submit(Runnable task, T result);
+
+    Future<?> submit(Runnable task);
+    <T> List<Future<T>> invokeAll(Collection<?extends Callable<T>> tasks) throws InterruptedException;
+
+    <T> List<Future<T>> invokeAll(Collection<?extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException;
+
+    <T> T invokeAny(Collection<?extends Callable<T>> tasks) throws InterruptedException, ExecutionException;
+
+    <T> T invokeAny(Collection<?extends Callable<T>> tasks, long timeout, TimeUnit unit)throws InterruptedException, ExecutionException, TimeoutException;
 }
 ```
 
@@ -153,7 +137,7 @@ public interface ExecutorService extends Executor {
 而ExecutorService又是继承了Executor接口，我们看一下Executor接口的实现：
 ```Java
 public interface Executor {
-    voidexecute(Runnable command);
+    void execute(Runnable command);
 }
 ```
 
@@ -286,7 +270,7 @@ public void execute(Runnable command) {
             if(runState != RUNNING || poolSize == 0)
                 ensureQueuedTaskHandled(command);
         }
-        elseif (!addIfUnderMaximumPoolSize(command))
+        else if (!addIfUnderMaximumPoolSize(command))
             reject(command);// is shutdown or saturated
     }
 }
@@ -349,9 +333,9 @@ private boolean addIfUnderCorePoolSize(Runnable firstTask) {
         mainLock.unlock();
     }
     if(t == null)
-        returnfalse;
+        return false;
     t.start();
-    returntrue;
+    return true;
 }
 ```
 
@@ -373,11 +357,11 @@ private Thread addThread(Runnable firstTask) {
     if(t != null) {
         w.thread = t;           //将创建的线程的引用赋值为w的成员变量       
         workers.add(w);
-        intnt = ++poolSize;     //当前线程数加1       
+        int nt = ++poolSize;     //当前线程数加1       
         if(nt > largestPoolSize)
             largestPoolSize = nt;
     }
-    returnt;
+    return t;
 }
 ```
 
@@ -417,16 +401,14 @@ private final class Worker implements Runnable {
         final ReentrantLock runLock = this.runLock;
         runLock.lock();
         try{
-            if(runState < STOP &&
-                Thread.interrupted() &&
-                runState >= STOP)
+            if(runState < STOP && Thread.interrupted() && runState >= STOP)
             boolean ran = false;
             beforeExecute(thread, task);  //beforeExecute方法是ThreadPoolExecutor类的一个方法，没有具体实现，用户可以根据
             //自己需要重载这个方法和后面的afterExecute方法来进行一些统计信息，比如某个任务的执行时间等           
             try{
                 task.run();
                 ran =true;
-                afterExecute(task,null);
+                afterExecute(task, null);
                 ++completedTasks;
             }catch (RuntimeException ex) {
                 if(!ran)
@@ -481,9 +463,9 @@ public void run() {
  Runnable getTask() {
     for(;;) {
         try{
-            intstate = runState;
+            int state = runState;
             if(state > SHUTDOWN)
-                returnnull;
+                return null;
             Runnable r;
             if(state == SHUTDOWN)  // Help drain queue
                 r = workQueue.poll();
@@ -610,14 +592,14 @@ private boolean workerCanExit() {
 　　下面是这2个方法的实现：
 ```Java
 public boolean prestartCoreThread() {
-    returnaddIfUnderCorePoolSize(null);//注意传进去的参数是null
+    return addIfUnderCorePoolSize(null);//注意传进去的参数是null
 }
 
 public int prestartAllCoreThreads() {
-    intn = 0;
+    int n = 0;
     while(addIfUnderCorePoolSize(null))//注意传进去的参数是null
         ++n;
-    returnn;
+    return n;
 }
 ```
 
@@ -681,7 +663,7 @@ public class Test {
 class MyTask implements Runnable {
     private int taskNum;
 
-    publicMyTask(int num) {
+    public MyTask(int num) {
         this.taskNum = num;
     }
 
@@ -760,7 +742,7 @@ Executors.newFixedThreadPool(int);   //创建固定容量大小的缓冲池
 
 　　下面是这三个静态方法的具体实现;
 ```java
-public static ExecutorService newFixedThreadPool(intnThreads) {
+public static ExecutorService newFixedThreadPool(int nThreads) {
     return new ThreadPoolExecutor(nThreads, nThreads,
                                   0L, TimeUnit.MILLISECONDS,
                                   new LinkedBlockingQueue<Runnable>());
