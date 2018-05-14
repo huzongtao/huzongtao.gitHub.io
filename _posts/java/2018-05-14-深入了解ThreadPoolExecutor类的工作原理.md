@@ -185,6 +185,7 @@ runState表示当前线程池的状态，它是一个volatile变量用来保证�
 　　当线程池处于SHUTDOWN或STOP状态，并且所有工作线程已经销毁，任务缓存队列已经清空或执行结束后，线程池被设置为TERMINATED状态。
 #### 2.任务的执行
 　　在了解将任务提交给线程池到任务执行完毕整个过程之前，我们先来看一下ThreadPoolExecutor类中其他的一些比较重要成员变量：
+
 ```Java
 private final BlockingQueue<Runnable> workQueue;             //任务缓存队列，用来存放等待执行的任务
 private final ReentrantLock mainLock = newReentrantLock();   //线程池的主要状态锁，对线程池状态（比如线程池大小
@@ -206,6 +207,7 @@ privateint largestPoolSize;  //用来记录线程池中曾经出现过的最大�
 
 privatelong completedTaskCount;  //用来记录已经执行完毕的任务个数
 ```
+
 
 每个变量的作用都已经标明出来了，这里要重点解释一下corePoolSize、maximumPoolSize、largestPoolSize三个变量。
 
@@ -254,6 +256,7 @@ public void execute(Runnable command) {
     }
 }
 ```
+
 
 上面的代码可能看起来不是那么容易理解，下面我们一句一句解释：
 
