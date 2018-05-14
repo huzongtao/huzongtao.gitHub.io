@@ -11,6 +11,7 @@ Content here
 java.uitl.concurrent.ThreadPoolExecutor类是线程池中最核心的一个类，因此如果要透彻地了解Java中的线程池，必须先了解这个类。下面我们来看一下ThreadPoolExecutor类的具体实现源码。
 
 　　在ThreadPoolExecutor类中提供了四个构造方法：
+
 ```java
 public class ThreadPoolExecutor extendsAbstractExecutorService {
     .....
@@ -46,6 +47,8 @@ TimeUnit.MILLISECONDS;      //毫秒
 TimeUnit.MICROSECONDS;      //微妙
 TimeUnit.NANOSECONDS;       //纳秒
 ```
+
+
 * workQueue：一个阻塞队列，用来存储等待执行的任务，这个参数的选择也很重要，会对线程池的运行过程产生重大影响，一般来说，这里的阻塞队列有以下几种选择：
 ```html
 ArrayBlockingQueue;
@@ -56,12 +59,15 @@ SynchronousQueue;
 
 * threadFactory：线程工厂，主要用来创建线程；
 * handler：表示当拒绝处理任务时的策略，有以下四种取值：
+
 ```html
 ThreadPoolExecutor.AbortPolicy:丢弃任务并抛出RejectedExecutionException异常。
 ThreadPoolExecutor.DiscardPolicy：也是丢弃任务，但是不抛出异常。
 ThreadPoolExecutor.DiscardOldestPolicy：丢弃队列最前面的任务，然后重新尝试执行任务（重复此过程）
 ThreadPoolExecutor.CallerRunsPolicy：由调用线程处理该任务
 ```
+
+
 　　从上面给出的ThreadPoolExecutor类的代码可以知道，ThreadPoolExecutor继承了AbstractExecutorService，我们来看一下AbstractExecutorService的实现:
 
 ```Java
@@ -93,6 +99,8 @@ public abstract class AbstractExecutorService implements ExecutorService {
     };
 }
 ```
+
+
 AbstractExecutorService是一个抽象类，它实现了ExecutorService接口。
 
 我们接着看ExecutorService接口的实现：
@@ -120,12 +128,17 @@ public interface ExecutorService extendsExecutor {
         throwsInterruptedException, ExecutionException, TimeoutException;
 }
 ```
+
+
+
 而ExecutorService又是继承了Executor接口，我们看一下Executor接口的实现：
 ```Java
 public interface Executor {
     voidexecute(Runnable command);
 }
 ```
+
+
 到这里，大家应该明白了ThreadPoolExecutor、AbstractExecutorService、ExecutorService和Executor几个之间的关系了。
 
 　　Executor是一个顶层接口，在它里面只声明了一个方法execute(Runnable)，返回值为void，参数为Runnable类型，从字面意思可以理解，就是用来执行传进去的任务的；
@@ -165,13 +178,16 @@ shutdownNow()
 
 #### 1.线程池状态
 　　在ThreadPoolExecutor中定义了一个volatile变量，另外定义了几个static final变量表示线程池的各个状态：
-```Java
+
+```java
 volatile int runState;
 static final int RUNNING    =0;
 static final int SHUTDOWN   =1;
 static final int STOP       =2;
 static final int TERMINATED =3;
 ```
+
+
 runState表示当前线程池的状态，它是一个volatile变量用来保证线程之间的可见性；
 
 　　下面的几个static final变量表示runState可能的几个取值。
@@ -197,15 +213,15 @@ private volatile boolean allowCoreThreadTimeOut;   //是否允许为核心线程
 private volatile int   corePoolSize;     //核心池的大小（即线程池中的线程数目大于这个参数时，提交的任务会被放进任务缓存队列）
 private volatile int   maximumPoolSize;   //线程池最大能容忍的线程数
 
-privatevolatile int  poolSize;       //线程池中当前的线程数
+private volatile int  poolSize;       //线程池中当前的线程数
 
-privatevolatile RejectedExecutionHandler handler;//任务拒绝策略
+private volatile RejectedExecutionHandler handler;//任务拒绝策略
 
-privatevolatile ThreadFactory threadFactory;  //线程工厂，用来创建线程
+private volatile ThreadFactory threadFactory;  //线程工厂，用来创建线程
 
-privateint largestPoolSize;  //用来记录线程池中曾经出现过的最大线程数
+private int largestPoolSize;  //用来记录线程池中曾经出现过的最大线程数
 
-privatelong completedTaskCount;  //用来记录已经执行完毕的任务个数
+private long completedTaskCount;  //用来记录已经执行完毕的任务个数
 ```
 
 
@@ -320,10 +336,14 @@ private boolean addIfUnderCorePoolSize(Runnable firstTask) {
 }
 ```
 
+
  　　这个是addIfUnderCorePoolSize方法的具体实现，从名字可以看出它的意图就是当低于核心吃大小时执行的方法。下面看其具体实现，首先获取到锁，因为这地方涉及到线程池状态的变化，先通过if语句判断当前线程池中的线程数目是否小于核心池大小，有朋友也许会有疑问：前面在execute()方法中不是已经判断过了吗，只有线程池当前线程数目小于核心池大小才会执行addIfUnderCorePoolSize方法的，为何这地方还要继续判断？原因很简单，前面的判断过程中并没有加锁，因此可能在execute方法判断的时候poolSize小于corePoolSize，而判断完之后，在其他线程中又向线程池提交了任务，就可能导致poolSize不小于corePoolSize了，所以需要在这个地方继续判断。然后接着判断线程池的状态是否为RUNNING，原因也很简单，因为有可能在其他线程中调用了shutdown或者shutdownNow方法。然后就是执行:
+
  ```Java
  t = addThread(firstTask);
  ```
+
+
  这个方法也非常关键，传进去的参数为提交的任务，返回值为Thread类型。然后接着在下面判断t是否为空，为空则表明创建线程失败（即poolSize>=corePoolSize或者runState不等于RUNNING），否则调用t.start()方法启动线程。
 
 　　我们来看一下addThread方法的实现：
@@ -341,14 +361,17 @@ private Thread addThread(Runnable firstTask) {
     returnt;
 }
 ```
+
+
 在addThread方法中，首先用提交的任务创建了一个Worker对象，然后调用线程工厂threadFactory创建了一个新的线程t，然后将线程t的引用赋值给了Worker对象的成员变量thread，接着通过workers.add(w)将Worker对象添加到工作集当中。
 
 　　下面我们看一下Worker类的实现：
+
 ```Java
 private final class Workerimplements Runnable {
-    privatefinal ReentrantLock runLock =new ReentrantLock();
-    privateRunnable firstTask;
-    volatilelong completedTasks;
+    private final ReentrantLock runLock =new ReentrantLock();
+    private Runnable firstTask;
+    volatile long completedTasks;
     Thread thread;
     Worker(Runnable firstTask) {
         this.firstTask = firstTask;
@@ -357,7 +380,7 @@ private final class Workerimplements Runnable {
         returnrunLock.isLocked();
     }
     voidinterruptIfIdle() {
-        finalReentrantLock runLock = this.runLock;
+        final ReentrantLock runLock = this.runLock;
         if(runLock.tryLock()) {
             try{
         if(thread != Thread.currentThread())
@@ -367,18 +390,18 @@ private final class Workerimplements Runnable {
             }
         }
     }
-    voidinterruptNow() {
+    void interruptNow() {
         thread.interrupt();
     }
 
-    privatevoid runTask(Runnable task) {
-        finalReentrantLock runLock = this.runLock;
+    private void runTask(Runnable task) {
+        final ReentrantLock runLock = this.runLock;
         runLock.lock();
         try{
             if(runState < STOP &&
                 Thread.interrupted() &&
                 runState >= STOP)
-            booleanran = false;
+            boolean ran = false;
             beforeExecute(thread, task);  //beforeExecute方法是ThreadPoolExecutor类的一个方法，没有具体实现，用户可以根据
             //自己需要重载这个方法和后面的afterExecute方法来进行一些统计信息，比如某个任务的执行时间等           
             try{
@@ -396,7 +419,7 @@ private final class Workerimplements Runnable {
         }
     }
 
-    publicvoid run() {
+    public void run() {
         try{
             Runnable task = firstTask;
             firstTask =null;
@@ -474,7 +497,7 @@ public void run() {
 　　然后判断取到的任务r是否为null，为null则通过调用workerCanExit()方法来判断当前worker是否可以退出，我们看一下workerCanExit()的实现：
 ```Java
 private boolean workerCanExit() {
-    finalReentrantLock mainLock = this.mainLock;
+    final ReentrantLock mainLock = this.mainLock;
     mainLock.lock();
     booleancanExit;
     //如果runState大于等于STOP，或者任务缓存队列为空了
@@ -494,7 +517,7 @@ private boolean workerCanExit() {
  　　也就是说如果线程池处于STOP状态、或者任务队列已为空或者允许为核心池线程设置空闲存活时间并且线程数大于1时，允许worker退出。如果允许worker退出，则调用interruptIdleWorkers()中断处于空闲状态的worker，我们看一下interruptIdleWorkers()的实现：
  ```Java
  void interruptIdleWorkers() {
-    finalReentrantLock mainLock = this.mainLock;
+    final ReentrantLock mainLock = this.mainLock;
     mainLock.lock();
     try{
         for(Worker w : workers)  //实际上调用的是worker的interruptIfIdle()方法
@@ -509,7 +532,7 @@ private boolean workerCanExit() {
 
  ```Java
  void interruptIfIdle() {
-    finalReentrantLock runLock = this.runLock;
+    final ReentrantLock runLock = this.runLock;
     if(runLock.tryLock()) {    //注意这里，是调用tryLock()来获取锁的，因为如果当前worker正在执行任务，锁已经被获取了，是无法获取到锁的
                                 //如果成功获取了锁，说明当前worker处于空闲状态
         try{
@@ -528,7 +551,7 @@ private boolean workerCanExit() {
 ```Java
 private boolean addIfUnderMaximumPoolSize(Runnable firstTask) {
     Thread t =null;
-    finalReentrantLock mainLock = this.mainLock;
+    final ReentrantLock mainLock = this.mainLock;
     mainLock.lock();
     try{
         if(poolSize < maximumPoolSize && runState == RUNNING)
@@ -620,7 +643,7 @@ ThreadPoolExecutor.CallerRunsPolicy：由调用线程处理该任务
 　　前面我们讨论了关于线程池的实现原理，这一节我们来看一下它的具体使用：
 ```Java
 public class Test {
-     publicstatic void main(String[] args) {   
+     public static void main(String[] args) {   
          ThreadPoolExecutor executor =new ThreadPoolExecutor(5,10, 200, TimeUnit.MILLISECONDS,
                  newArrayBlockingQueue<Runnable>(5));
 
@@ -636,7 +659,7 @@ public class Test {
 
 
 class MyTask implements Runnable {
-    privateint taskNum;
+    private int taskNum;
 
     publicMyTask(int num) {
         this.taskNum = num;
@@ -718,20 +741,20 @@ Executors.newFixedThreadPool(int);   //创建固定容量大小的缓冲池
 　　下面是这三个静态方法的具体实现;
 ```java
 public static ExecutorService newFixedThreadPool(intnThreads) {
-    returnnew ThreadPoolExecutor(nThreads, nThreads,
+    return new ThreadPoolExecutor(nThreads, nThreads,
                                   0L, TimeUnit.MILLISECONDS,
-                                  newLinkedBlockingQueue<Runnable>());
+                                  new LinkedBlockingQueue<Runnable>());
 }
 public static ExecutorService newSingleThreadExecutor() {
-    returnnew FinalizableDelegatedExecutorService
-        (newThreadPoolExecutor(1,1,
+    return new FinalizableDelegatedExecutorService
+        (new ThreadPoolExecutor(1,1,
                                 0L, TimeUnit.MILLISECONDS,
                                 newLinkedBlockingQueue<Runnable>()));
 }
 public static ExecutorService newCachedThreadPool() {
-    returnnew ThreadPoolExecutor(0, Integer.MAX_VALUE,
+    return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
                                   60L, TimeUnit.SECONDS,
-                                  newSynchronousQueue<Runnable>());
+                                  new SynchronousQueue<Runnable>());
 }
 ```
 从它们的具体实现来看，它们实际上也是调用了ThreadPoolExecutor，只不过参数都已配置好了。
@@ -759,16 +782,17 @@ public static ExecutorService newCachedThreadPool() {
 
 参考资料：
 
-http://ifeve.com/java-threadpool/
+[http://ifeve.com/java-threadpool/](http://ifeve.com/java-threadpool/)
 
-http://blog.163.com/among_1985/blog/static/275005232012618849266/
+[http://blog.163.com/among_1985/blog/static/275005232012618849266/
+](http://blog.163.com/among_1985/blog/static/275005232012618849266/)
 
-http://developer.51cto.com/art/201203/321885.htm
+[http://developer.51cto.com/art/201203/321885.htm](http://developer.51cto.com/art/201203/321885.htm)
 
-http://blog.csdn.net/java2000_wl/article/details/22097059
+[http://blog.csdn.net/java2000_wl/article/details/22097059](http://blog.csdn.net/java2000_wl/article/details/22097059)
 
-http://blog.csdn.net/cutesource/article/details/6061229
+[http://blog.csdn.net/cutesource/article/details/6061229](http://blog.csdn.net/cutesource/article/details/6061229)
 
-http://blog.csdn.net/xieyuooo/article/details/8718741
+[http://blog.csdn.net/xieyuooo/article/details/8718741](http://blog.csdn.net/xieyuooo/article/details/8718741)
 
 《JDK API 1.6》
